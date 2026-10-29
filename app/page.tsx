@@ -791,7 +791,11 @@ export default function BillenzaLanding() {
               Join thousands of Indian businesses generating compliant invoices
               and filing GSTR returns with ironclad confidence.
             </p>
-            <a href="#pricing" className="pill pill-lime pill-lg">
+            <a
+              href="#pricing"
+              id="footer-cta-btn"
+              className="pill pill-lime pill-lg"
+            >
               Get Started Now — ₹499/mo
               <span className="pill-arrow">
                 <ArrowRight size={20} />
