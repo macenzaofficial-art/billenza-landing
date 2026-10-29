@@ -194,7 +194,7 @@ a {
 }
 
 .brand-word {
-  font-size: 22px;
+  font-size: 26px;
   letter-spacing: -0.03em;
 }
 
@@ -445,7 +445,6 @@ a {
   align-items: center;
   justify-content: space-between;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--line-soft);
 }
 
 .console-id {
@@ -490,7 +489,6 @@ a {
   width: 100%;
   height: auto;
   display: block;
-  border-radius: 14px;
 }
 
 .float-pill {

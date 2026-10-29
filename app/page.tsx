@@ -22,7 +22,6 @@ import {
 
 export default function BillenzaLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const toggleFaq = (idx: number) => {
@@ -32,7 +31,8 @@ export default function BillenzaLanding() {
   const handleSubscribe = (planTier: string) => {
     // In production, this opens the Razorpay checkout modal or redirects to checkout
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.billenza.com";
-    window.location.href = `${appUrl}/signup?plan=${planTier}&billing=${billingCycle}`;
+    const cycle = planTier.includes("yearly") ? "yearly" : "monthly";
+    window.location.href = `${appUrl}/signup?plan=${planTier}&billing=${cycle}`;
   };
 
   return (
@@ -41,9 +41,6 @@ export default function BillenzaLanding() {
       <header className="site-header" id="top">
         <nav className="nav container">
           <a href="#top" className="brand" aria-label="Billenza home">
-            <span className="brand-chip" aria-hidden="true">
-              <Zap size={20} fill="#DCF986" stroke="#1D1D1D" />
-            </span>
             <span className="brand-word">Billenza</span>
           </a>
 
@@ -193,18 +190,13 @@ export default function BillenzaLanding() {
                 <Image
                   src="/billenza-app.jpg"
                   alt="Billenza Invoicing Console Dashboard"
-                  width={1400}
-                  height={800}
+                  width={1920}
+                  height={960}
                   priority
                   className="app-screenshot"
                 />
 
                 {/* Floating Badges */}
-                <div className="float-pill">
-                  <span className="ndot live"></span>
-                  100% GST COMPLIANT
-                </div>
-
                 <div className="float-pill-bottom">
                   <Sparkles size={16} color="#DCF986" />
                   ₹14,80,240 Invoiced &bull; 0 Errors
@@ -430,11 +422,11 @@ export default function BillenzaLanding() {
                   <span style={{ background: "var(--lime)", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6 }}>VERIFIED</span>
                 </div>
                 <div style={{ background: "var(--card)", padding: 16, borderRadius: 12, border: "1px solid var(--line-soft)" }}>
-                  <div style={{ fontSize: 15, fontWeight: 700 }}>Acme Technologies Pvt Ltd</div>
-                  <div style={{ fontSize: 12, color: "var(--gray)", marginTop: 4 }}>GSTIN: 27AABCA1234F1Z5 &bull; Maharashtra (27)</div>
+                  <div style={{ fontSize: 15, fontWeight: 700 }}>Macenza Technologies Pvt Ltd</div>
+                  <div style={{ fontSize: 12, color: "var(--gray)", marginTop: 4 }}>GSTIN: 27AABCA1234F1Z5 &bull; Rajasthan (27)</div>
                   <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
                     <span style={{ background: "#fff", border: "1px solid var(--line)", padding: "4px 8px", borderRadius: 6, fontSize: 11 }}>HDFC Bank</span>
-                    <span style={{ background: "#fff", border: "1px solid var(--line)", padding: "4px 8px", borderRadius: 6, fontSize: 11 }}>UPI ID: acme@hdfc</span>
+                    <span style={{ background: "#fff", border: "1px solid var(--line)", padding: "4px 8px", borderRadius: 6, fontSize: 11 }}>UPI ID: macenza@hdfc</span>
                   </div>
                 </div>
               </div>
@@ -558,25 +550,6 @@ export default function BillenzaLanding() {
             </p>
           </div>
 
-          {/* Pricing Toggle */}
-          <div className="pricing-switch-wrap">
-            <div className="pricing-toggle">
-              <button
-                className={`toggle-btn ${billingCycle === "monthly" ? "active" : ""}`}
-                onClick={() => setBillingCycle("monthly")}
-              >
-                Monthly Billing
-              </button>
-              <button
-                className={`toggle-btn ${billingCycle === "yearly" ? "active" : ""}`}
-                onClick={() => setBillingCycle("yearly")}
-              >
-                Annual Billing
-              </button>
-            </div>
-            <span className="save-badge">SAVE ~17% YEARLY</span>
-          </div>
-
           <div className="plans">
             {/* Plan 1: Monthly */}
             <div className="plan">
@@ -635,7 +608,7 @@ export default function BillenzaLanding() {
 
             {/* Plan 2: Annual Pro (Featured) */}
             <div className="plan featured">
-              <span className="pop">MOST POPULAR &bull; SAVE ₹989</span>
+              <span className="pop">SAVE ~17% YEARLY</span>
               <div className="plan-name">ANNUAL PRO</div>
               <div className="plan-price">
                 ₹4,999
