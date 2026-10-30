@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import CheckoutModal from "../components/CheckoutModal";
 import {
   FileText,
   ShieldCheck,
@@ -23,16 +24,17 @@ import {
 export default function BillenzaLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [checkoutPlan, setCheckoutPlan] = useState<'pro_monthly' | 'pro_yearly'>('pro_monthly');
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.billenza.com";
+
+  const openCheckout = (plan: 'pro_monthly' | 'pro_yearly') => {
+    setCheckoutPlan(plan);
+    setCheckoutOpen(true);
+  };
 
   const toggleFaq = (idx: number) => {
     setOpenFaq(openFaq === idx ? null : idx);
-  };
-
-  const handleSubscribe = (planTier: string) => {
-    // In production, this opens the Razorpay checkout modal or redirects to checkout
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.billenza.com";
-    const cycle = planTier.includes("yearly") ? "yearly" : "monthly";
-    window.location.href = `${appUrl}/signup?plan=${planTier}&billing=${cycle}`;
   };
 
   return (
@@ -83,16 +85,25 @@ export default function BillenzaLanding() {
             </a>
           </div>
 
-          <div className="nav-right">
+          <div className="nav-right" style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <a
-              href="https://app.billenza.com"
-              className="pill pill-ink nav-cta"
+              href={`${appUrl}?mode=login`}
+              className="nav-link"
+              style={{ fontWeight: 600, fontSize: "0.9rem", color: "var(--ink)", padding: "6px 12px" }}
             >
-              Launch App
+              Sign In
+            </a>
+            <button
+              type="button"
+              onClick={() => openCheckout('pro_monthly')}
+              className="pill pill-ink nav-cta"
+              style={{ cursor: 'pointer', border: 'none' }}
+            >
+              Get Started
               <span className="pill-arrow" aria-hidden="true">
                 <ArrowRight size={18} />
               </span>
-            </a>
+            </button>
             <button
               className={`hamburger ${mobileMenuOpen ? "open" : ""}`}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -119,14 +130,27 @@ export default function BillenzaLanding() {
           <a href="#faq" onClick={() => setMobileMenuOpen(false)}>
             FAQ
           </a>
-          <a
-            href="https://app.billenza.com"
-            className="pill pill-ink"
-            style={{ justifyContent: "center", marginTop: 10 }}
-          >
-            Launch Billenza App
-            <ArrowRight size={16} />
-          </a>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 14 }}>
+            <a
+              href={`${appUrl}?mode=login`}
+              className="pill"
+              style={{ justifyContent: "center", border: "1px solid var(--line)", background: "#fff", color: "var(--ink)" }}
+            >
+              Sign In
+            </a>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                openCheckout('pro_monthly');
+              }}
+              className="pill pill-ink"
+              style={{ justifyContent: "center", cursor: "pointer", border: "none" }}
+            >
+              Get Started Free
+              <ArrowRight size={16} />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -154,8 +178,8 @@ export default function BillenzaLanding() {
                 <ArrowRight size={20} />
               </span>
             </a>
-            <a href="#features" className="pill pill-ghost pill-lg">
-              Explore Features
+            <a href={appUrl} className="pill pill-ghost pill-lg">
+              Launch App
               <span className="pill-arrow gray">
                 <ArrowRight size={20} />
               </span>
@@ -206,7 +230,7 @@ export default function BillenzaLanding() {
               {/* Status Nodes */}
               <div className="console-status">
                 <div className="node">
-                  <span className="ndot live"></span>
+                  <span className="ndot live" style={{ color: "var(--ink)", backgroundColor: "var(--lime)" }}></span>
                   GSTN API: Connected
                 </div>
                 <div className="node">
@@ -521,7 +545,7 @@ export default function BillenzaLanding() {
               <div className="how-card">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: "var(--gray)" }}>GSTN EXPORT READY</span>
-                  <span style={{ background: "#22c55e", color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6 }}>VALIDATED</span>
+                  <span style={{ background: "var(--lime)", color: "var(--ink)", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6 }}>VALIDATED</span>
                 </div>
                 <div style={{ background: "var(--card)", padding: 16, borderRadius: 12, border: "1px solid var(--line-soft)" }}>
                   <div style={{ fontSize: 13, fontWeight: 600 }}>GSTR-1 JSON Package (B2B, B2CL, EXP, HSN)</div>
@@ -596,8 +620,10 @@ export default function BillenzaLanding() {
               </ul>
 
               <button
-                onClick={() => handleSubscribe("pro_monthly")}
+                type="button"
+                onClick={() => openCheckout('pro_monthly')}
                 className="pill pill-ink plan-cta"
+                style={{ width: "100%", justifyContent: "center", cursor: "pointer", border: "none" }}
               >
                 Subscribe Monthly — ₹499
                 <span className="pill-arrow">
@@ -658,9 +684,10 @@ export default function BillenzaLanding() {
               </ul>
 
               <button
-                onClick={() => handleSubscribe("pro_yearly")}
+                type="button"
+                onClick={() => openCheckout('pro_yearly')}
                 className="pill pill-lime plan-cta"
-                style={{ fontWeight: 700 }}
+                style={{ width: "100%", justifyContent: "center", fontWeight: 700, cursor: "pointer", border: "none" }}
               >
                 Get Annual Pro — ₹4,999
                 <span className="pill-arrow">
@@ -791,16 +818,18 @@ export default function BillenzaLanding() {
               Join thousands of Indian businesses generating compliant invoices
               and filing GSTR returns with ironclad confidence.
             </p>
-            <a
-              href="#pricing"
+            <button
+              type="button"
+              onClick={() => openCheckout('pro_monthly')}
               id="footer-cta-btn"
               className="pill pill-lime pill-lg"
+              style={{ cursor: "pointer", border: "none" }}
             >
               Get Started Now — ₹499/mo
               <span className="pill-arrow">
                 <ArrowRight size={20} />
               </span>
-            </a>
+            </button>
           </div>
         </div>
       </section>
@@ -858,6 +887,14 @@ export default function BillenzaLanding() {
           </div>
         </div>
       </footer>
+
+      {/* Embedded Razorpay & Supabase Checkout Modal */}
+      <CheckoutModal
+        isOpen={checkoutOpen}
+        onClose={() => setCheckoutOpen(false)}
+        initialPlan={checkoutPlan}
+        appUrl={appUrl}
+      />
     </div>
   );
 }
