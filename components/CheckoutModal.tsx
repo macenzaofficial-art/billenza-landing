@@ -75,6 +75,7 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
     try {
       let currentUserId: string | null = null;
       let currentUserEmail: string = email.trim().toLowerCase();
+      let userToken: string | null = null;
 
       // 1. Authenticate or Register with Supabase Auth
       if (authMode === 'signup') {
@@ -98,16 +99,21 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
         }
 
         currentUserId = signUpData.user?.id || null;
+        userToken = signUpData.session?.access_token || null;
 
-        // Auto-provision basic organization row
+        // Auto-provision basic organization row (inactive by default)
         if (currentUserId) {
-          await supabase.from('organizations').upsert({
-            owner_id: currentUserId,
-            name: businessName.trim() || 'My Business',
-            subscription_status: 'inactive',
-            plan_tier: plan,
-            updated_at: new Date().toISOString(),
-          });
+          try {
+            await supabase.from('organizations').upsert({
+              owner_id: currentUserId,
+              name: businessName.trim() || 'My Business',
+              subscription_status: 'inactive',
+              plan_tier: plan,
+              updated_at: new Date().toISOString(),
+            });
+          } catch (orgInitErr) {
+            console.warn('Organization auto-provision note:', orgInitErr);
+          }
         }
       } else {
         // Login mode
@@ -118,6 +124,12 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
 
         if (signInError) throw signInError;
         currentUserId = signInData.user?.id || null;
+        userToken = signInData.session?.access_token || null;
+      }
+
+      if (!userToken) {
+        const { data: sessionData } = await supabase.auth.getSession();
+        userToken = sessionData.session?.access_token || null;
       }
 
       if (!currentUserId) {
@@ -147,7 +159,10 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
       // 4. Create Razorpay Subscription via Next.js API
       const res = await fetch('/api/razorpay/create-subscription', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(userToken ? { Authorization: `Bearer ${userToken}` } : {}),
+        },
         body: JSON.stringify({
           planTier: plan,
           email: currentUserEmail,
@@ -177,19 +192,32 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
         handler: async (response: any) => {
           setLoading(true);
           try {
-            // Update Supabase subscription directly
-            await supabase.from('organizations').upsert({
-              owner_id: currentUserId,
-              subscription_status: 'active',
-              plan_tier: plan,
-              razorpay_subscription_id: response.razorpay_subscription_id || response.razorpay_payment_id || `sub_${Date.now()}`,
-              updated_at: new Date().toISOString(),
+            // Secure server-side payment & signature verification
+            const verifyRes = await fetch('/api/razorpay/verify-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(userToken ? { Authorization: `Bearer ${userToken}` } : {}),
+              },
+              body: JSON.stringify({
+                orderId: response.razorpay_order_id,
+                subscriptionId: response.razorpay_subscription_id,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+                planTier: plan,
+                userId: currentUserId,
+              }),
             });
+
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok) {
+              throw new Error(verifyData.error || 'Server payment verification failed.');
+            }
 
             setPaymentSuccess(true);
           } catch (e: any) {
-            console.error('Failed to sync active subscription:', e);
-            setError('Payment completed but failed to sync state. Please refresh or contact support.');
+            console.error('Failed to verify active subscription:', e);
+            setError(e.message || 'Payment completed but failed to verify on server. Please contact support.');
           } finally {
             setLoading(false);
           }
