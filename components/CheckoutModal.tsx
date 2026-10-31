@@ -174,6 +174,58 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
                 });
               if (orgInsertError) console.warn('Organization auto-provision note:', orgInsertError);
             }
+
+            // Auto-provision basic profile row so the business name appears in the app immediately
+            try {
+              const { data: existingProf, error: findProfError } = await supabase
+                .from('profiles')
+                .select('id, business_name, data')
+                .eq('user_id', currentUserId)
+                .maybeSingle();
+
+              if (!findProfError) {
+                const suppliedName = businessName.trim();
+                if (existingProf?.id) {
+                  // Only update if the user provided an explicit business name
+                  if (suppliedName && suppliedName !== existingProf.business_name) {
+                    const existingData =
+                      typeof existingProf.data === 'object' && existingProf.data !== null
+                        ? (existingProf.data as Record<string, unknown>)
+                        : {};
+
+                    await supabase
+                      .from('profiles')
+                      .update({
+                        business_name: suppliedName,
+                        data: {
+                          ...existingData,
+                          businessName: suppliedName,
+                        },
+                        updated_at: new Date().toISOString(),
+                      })
+                      .eq('id', existingProf.id);
+                  }
+                } else {
+                  const companyTitle = suppliedName || 'My Business';
+                  await supabase
+                    .from('profiles')
+                    .insert({
+                      user_id: currentUserId,
+                      business_name: companyTitle,
+                      email: currentUserEmail,
+                      is_default: true,
+                      data: {
+                        businessName: companyTitle,
+                        email: currentUserEmail,
+                        isDefault: true,
+                      },
+                      updated_at: new Date().toISOString(),
+                    });
+                }
+              }
+            } catch (profErr) {
+              console.warn('Profile auto-provision note:', profErr);
+            }
           } catch (orgInitErr) {
             console.warn('Organization auto-provision note:', orgInitErr);
           }

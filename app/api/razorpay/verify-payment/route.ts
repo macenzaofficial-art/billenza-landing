@@ -23,6 +23,103 @@ export async function OPTIONS(request: Request) {
   return NextResponse.json({}, { headers: getCorsHeaders(request) });
 }
 
+async function syncDefaultBusinessProfile({
+  admin,
+  verifiedUserId,
+  verifiedEmail,
+  notesName,
+  orgId,
+}: {
+  admin: ReturnType<typeof getSupabaseAdmin>;
+  verifiedUserId: string;
+  verifiedEmail: string;
+  notesName?: string;
+  orgId?: string;
+}): Promise<boolean> {
+  try {
+    const { data: existingProf, error: findProfErr } = await admin
+      .from('profiles')
+      .select('id, business_name, data')
+      .eq('user_id', verifiedUserId)
+      .limit(1)
+      .maybeSingle();
+
+    if (findProfErr) {
+      console.warn('Profile lookup failed in verify-payment:', findProfErr);
+      return false;
+    }
+
+    let detectedName = notesName && notesName !== 'Billenza Customer'
+      ? notesName
+      : null;
+
+    if (!detectedName && orgId) {
+      const { data: orgInfo, error: orgInfoErr } = await admin
+        .from('organizations')
+        .select('business_name')
+        .eq('id', orgId)
+        .maybeSingle();
+
+      if (orgInfoErr) {
+        console.warn('Org info lookup error in verify-payment profile sync:', orgInfoErr);
+      } else if (orgInfo?.business_name && orgInfo.business_name !== 'My Business') {
+        detectedName = orgInfo.business_name;
+      }
+    }
+
+    const finalBizName = detectedName || 'My Business';
+
+    if (!existingProf) {
+      const { error: insertProfErr } = await admin
+        .from('profiles')
+        .insert({
+          user_id: verifiedUserId,
+          business_name: finalBizName,
+          email: verifiedEmail || '',
+          is_default: true,
+          data: {
+            businessName: finalBizName,
+            email: verifiedEmail || '',
+            isDefault: true,
+          },
+          updated_at: new Date().toISOString(),
+        });
+
+      if (insertProfErr) {
+        console.warn('Profile insert error in verify-payment:', insertProfErr);
+        return false;
+      }
+    } else if (detectedName && (!existingProf.business_name || existingProf.business_name === 'My Business')) {
+      const existingData =
+        typeof existingProf.data === 'object' && existingProf.data !== null
+          ? (existingProf.data as Record<string, unknown>)
+          : {};
+
+      const { error: updateProfErr } = await admin
+        .from('profiles')
+        .update({
+          business_name: detectedName,
+          data: {
+            ...existingData,
+            businessName: detectedName,
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingProf.id);
+
+      if (updateProfErr) {
+        console.warn('Profile update error in verify-payment:', updateProfErr);
+        return false;
+      }
+    }
+
+    return true;
+  } catch (profSyncErr) {
+    console.warn('Profile sync in verify-payment note:', profSyncErr);
+    return false;
+  }
+}
+
 export async function POST(request: Request) {
   const corsHeaders = getCorsHeaders(request);
 
@@ -49,6 +146,7 @@ export async function POST(request: Request) {
       );
     }
     const verifiedUserId = authUser.id;
+    const verifiedEmail = authUser.email || '';
 
     // 2. Validate Razorpay gateway configuration
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -132,6 +230,7 @@ export async function POST(request: Request) {
     // 5. Bind payment user notes to verifiedUserId
     let notesUserId = payData.notes?.user_id;
     let notesPlanTier = payData.notes?.plan_tier;
+    let notesName = payData.notes?.name;
 
     // If payment entity does not include user notes, fetch from parent subscription or order
     if (!notesUserId && subscriptionId) {
@@ -143,6 +242,7 @@ export async function POST(request: Request) {
           const subData = await subRes.json();
           notesUserId = notesUserId || subData.notes?.user_id;
           notesPlanTier = notesPlanTier || subData.notes?.plan_tier;
+          notesName = notesName || subData.notes?.name;
         }
       } catch (err) {
         console.warn('Could not fetch subscription notes from Razorpay API:', err);
@@ -157,6 +257,7 @@ export async function POST(request: Request) {
           const orderData = await orderRes.json();
           notesUserId = notesUserId || orderData.notes?.user_id;
           notesPlanTier = notesPlanTier || orderData.notes?.plan_tier;
+          notesName = notesName || orderData.notes?.name;
         }
       } catch (err) {
         console.warn('Could not fetch order notes from Razorpay API:', err);
@@ -204,7 +305,7 @@ export async function POST(request: Request) {
     if (subIdentifiers.length > 0) {
       const { data: existingSubOrgs, error: existingSubErr } = await admin
         .from('organizations')
-        .select('owner_id, subscription_status, razorpay_subscription_id')
+        .select('id, owner_id, subscription_status, razorpay_subscription_id')
         .in('razorpay_subscription_id', subIdentifiers);
 
       if (existingSubErr) {
@@ -230,7 +331,18 @@ export async function POST(request: Request) {
       }
 
       // If already active with this payment identifier for this user, return success idempotently
-      if (existingSubOrgs && existingSubOrgs.some(o => o.owner_id === verifiedUserId && o.subscription_status === 'active')) {
+      const matchingActiveOrg = existingSubOrgs?.find(
+        (o) => o.owner_id === verifiedUserId && o.subscription_status === 'active'
+      );
+      if (matchingActiveOrg) {
+        await syncDefaultBusinessProfile({
+          admin,
+          verifiedUserId,
+          verifiedEmail,
+          notesName,
+          orgId: matchingActiveOrg.id,
+        });
+
         return NextResponse.json(
           {
             success: true,
@@ -260,6 +372,7 @@ export async function POST(request: Request) {
     }
 
     let saveOrgError = null;
+    let savedOrgId = existingUserOrg?.id;
     if (existingUserOrg?.id) {
       const { error: updateErr } = await admin
         .from('organizations')
@@ -272,7 +385,7 @@ export async function POST(request: Request) {
         .eq('id', existingUserOrg.id);
       saveOrgError = updateErr;
     } else {
-      const { error: insertErr } = await admin
+      const { data: insertedOrg, error: insertErr } = await admin
         .from('organizations')
         .insert({
           owner_id: verifiedUserId,
@@ -280,7 +393,9 @@ export async function POST(request: Request) {
           plan_tier: resolvedTier,
           razorpay_subscription_id: targetSubId,
           updated_at: new Date().toISOString(),
-        });
+        })
+        .select('id')
+        .maybeSingle();
 
       // If a concurrent webhook already inserted this record, recover idempotently
       if (insertErr && (insertErr as { code?: string }).code === '23505') {
@@ -292,11 +407,15 @@ export async function POST(request: Request) {
 
         if (alreadyInsertedOrg && alreadyInsertedOrg.owner_id === verifiedUserId) {
           saveOrgError = null;
+          savedOrgId = alreadyInsertedOrg.id;
         } else {
           saveOrgError = insertErr;
         }
       } else {
         saveOrgError = insertErr;
+        if (insertedOrg?.id) {
+          savedOrgId = insertedOrg.id;
+        }
       }
     }
 
@@ -307,6 +426,15 @@ export async function POST(request: Request) {
         { status: 500, headers: corsHeaders }
       );
     }
+
+    // 9. Ensure a default business profile exists in public.profiles so the user sees their company name in the app
+    await syncDefaultBusinessProfile({
+      admin,
+      verifiedUserId,
+      verifiedEmail,
+      notesName,
+      orgId: savedOrgId || existingUserOrg?.id,
+    });
 
     return NextResponse.json(
       {
