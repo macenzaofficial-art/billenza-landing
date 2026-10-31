@@ -130,11 +130,11 @@ a {
 }
 
 .pill:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1.5px);
 }
 
 .pill-ink:hover {
-  box-shadow: 0 14px 30px -10px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 10px 24px -8px rgba(0, 0, 0, 0.35);
 }
 
 .pill-arrow {
@@ -224,6 +224,14 @@ a {
 
 .nav-link:hover {
   color: var(--ink);
+}
+
+.chev {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.has-menu:hover .chev {
+  transform: rotate(180deg);
 }
 
 .nav-item {
@@ -316,19 +324,18 @@ a {
 }
 
 .mobile-sheet {
-  display: none;
+  display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 0 24px;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.35s ease, padding 0.35s ease;
+  padding: 18px 24px 24px;
   border-top: 1px solid var(--line-soft);
+  overflow: hidden;
 }
 
-.mobile-sheet.open {
-  max-height: 380px;
-  padding: 18px 24px 24px;
+@media (min-width: 921px) {
+  .mobile-sheet {
+    display: none !important;
+  }
 }
 
 .mobile-sheet a {
@@ -416,6 +423,7 @@ a {
   max-width: 1060px;
   margin-top: 54px;
   margin-inline: auto;
+  perspective: 1200px;
 }
 
 .glow {
@@ -423,6 +431,8 @@ a {
   border-radius: 50%;
   filter: blur(80px);
   z-index: -1;
+  pointer-events: none;
+  will-change: transform;
 }
 
 .glow-lime {
@@ -448,6 +458,8 @@ a {
   box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.28);
   padding: 22px;
   text-align: left;
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .console-head {
@@ -897,6 +909,7 @@ div.console-wrap:nth-of-type(2) > div.console:nth-of-type(3) > div.console-statu
   letter-spacing: 0.08em;
   padding: 6px 14px;
   border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(220, 249, 134, 0.45);
 }
 
 .plan-name {

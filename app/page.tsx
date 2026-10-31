@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import CheckoutModal from "../components/CheckoutModal";
@@ -19,13 +19,43 @@ import {
   Building2,
   Zap,
 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger, useGSAP);
+}
 
 export default function BillenzaLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkoutPlan, setCheckoutPlan] = useState<'pro_monthly' | 'pro_yearly'>('pro_monthly');
+  const [scrolled, setScrolled] = useState(false);
+
+  const mainRef = useRef<HTMLDivElement>(null);
+  const consoleRef = useRef<HTMLDivElement>(null);
+  const glowLimeRef = useRef<HTMLDivElement>(null);
+  const glowInkRef = useRef<HTMLDivElement>(null);
+
+  // Metric counter refs for GSAP ScrollTrigger
+  const metric1Ref = useRef<HTMLDivElement>(null);
+  const metric2Ref = useRef<HTMLDivElement>(null);
+  const metric3Ref = useRef<HTMLDivElement>(null);
+  const metric4Ref = useRef<HTMLDivElement>(null);
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://app.billenza.com";
+
+  // Track window scroll for sticky header elevation
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const openCheckout = (plan: 'pro_monthly' | 'pro_yearly') => {
     setCheckoutPlan(plan);
@@ -45,12 +75,320 @@ export default function BillenzaLanding() {
     }
   };
 
+  // GSAP Animations Hook
+  useGSAP(() => {
+    // 1. Hero Entrance Timeline
+    const heroTl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+    heroTl
+      .from(".hero .eyebrow", {
+        opacity: 0,
+        y: 18,
+        duration: 0.6,
+      })
+      .from(
+        ".hero h1",
+        {
+          opacity: 0,
+          y: 35,
+          duration: 0.85,
+        },
+        "-=0.3"
+      )
+      .from(
+        ".hero-sub",
+        {
+          opacity: 0,
+          y: 20,
+          duration: 0.75,
+        },
+        "-=0.5"
+      )
+      .from(
+        ".hero-actions > *",
+        {
+          opacity: 0,
+          y: 16,
+          scale: 0.96,
+          stagger: 0.1,
+          duration: 0.6,
+          ease: "power2.out",
+          clearProps: "all",
+        },
+        "-=0.4"
+      )
+      .from(
+        ".console-wrap",
+        {
+          opacity: 0,
+          y: 45,
+          scale: 0.94,
+          rotationX: 8,
+          transformPerspective: 1000,
+          duration: 1.1,
+        },
+        "-=0.3"
+      )
+      .from(
+        ".console-status .node",
+        {
+          opacity: 0,
+          y: 10,
+          stagger: 0.08,
+          duration: 0.5,
+        },
+        "-=0.4"
+      )
+      .from(
+        ".float-pill-bottom",
+        {
+          opacity: 0,
+          scale: 0.85,
+          duration: 0.5,
+          ease: "power2.out",
+          clearProps: "all",
+        },
+        "-=0.3"
+      );
+
+    // 2. Ambient Glow Breathing / Floating Loop
+    gsap.to(".glow-lime", {
+      x: 22,
+      y: -16,
+      scale: 1.15,
+      duration: 5.5,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+    });
+
+    gsap.to(".glow-ink", {
+      x: -25,
+      y: 20,
+      scale: 1.2,
+      duration: 6.5,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+    });
+
+    // 3. Trust Logos Staggered ScrollTrigger
+    gsap.from(".logo-badge", {
+      scrollTrigger: {
+        trigger: ".trust",
+        start: "top 85%",
+        once: true,
+      },
+      opacity: 0,
+      y: 20,
+      stagger: 0.08,
+      duration: 0.6,
+      ease: "power2.out",
+    });
+
+    // 5. Metrics Band Animated Counters with ScrollTrigger
+    gsap.from(".metric", {
+      scrollTrigger: {
+        trigger: ".metrics-band",
+        start: "top 82%",
+        once: true,
+      },
+      opacity: 0,
+      y: 25,
+      stagger: 0.1,
+      duration: 0.7,
+      ease: "power2.out",
+    });
+
+    // Numerical counter interpolations
+    const c1 = { val: 0 };
+    const c2 = { val: 0 };
+    const c3 = { val: 0 };
+    const c4 = { val: 0 };
+
+    gsap.to(c1, {
+      val: 500,
+      duration: 2,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: ".metrics-band",
+        start: "top 82%",
+        once: true,
+      },
+      onUpdate: () => {
+        if (metric1Ref.current) {
+          metric1Ref.current.textContent = `₹${Math.floor(c1.val)}Cr+`;
+        }
+      },
+    });
+
+    gsap.to(c2, {
+      val: 99.99,
+      duration: 2.2,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: ".metrics-band",
+        start: "top 82%",
+        once: true,
+      },
+      onUpdate: () => {
+        if (metric2Ref.current) {
+          metric2Ref.current.textContent = `${c2.val.toFixed(2)}%`;
+        }
+      },
+    });
+
+    gsap.to(c3, {
+      val: 20,
+      duration: 1.8,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: ".metrics-band",
+        start: "top 82%",
+        once: true,
+      },
+      onUpdate: () => {
+        if (metric3Ref.current) {
+          metric3Ref.current.textContent = `<${Math.floor(c3.val)}s`;
+        }
+      },
+    });
+
+    gsap.to(c4, {
+      val: 22,
+      duration: 1.6,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: ".metrics-band",
+        start: "top 82%",
+        once: true,
+      },
+      onUpdate: () => {
+        if (metric4Ref.current) {
+          metric4Ref.current.textContent = `${Math.floor(c4.val)}`;
+        }
+      },
+    });
+
+    // 6. How it works step rows with ScrollTrigger
+    const howRows = gsap.utils.toArray<HTMLElement>(".how-row");
+    howRows.forEach((row) => {
+      const isRev = row.classList.contains("rev");
+      const copy = row.querySelector(".how-copy");
+      const card = row.querySelector(".how-card");
+      const ticks = row.querySelectorAll(".ticks li");
+
+      const rowTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: row,
+          start: "top 80%",
+          once: true,
+        },
+      });
+
+      rowTl
+        .from(copy, {
+          opacity: 0,
+          x: isRev ? 35 : -35,
+          duration: 0.7,
+          ease: "power3.out",
+        })
+        .from(
+          card,
+          {
+            opacity: 0,
+            x: isRev ? -35 : 35,
+            scale: 0.95,
+            duration: 0.7,
+            ease: "power3.out",
+          },
+          "-=0.5"
+        )
+        .from(
+          ticks,
+          {
+            opacity: 0,
+            x: -12,
+            stagger: 0.08,
+            duration: 0.4,
+            ease: "power2.out",
+          },
+          "-=0.3"
+        );
+    });
+  }, { scope: mainRef });
+
+  // 3D Parallax Mouse Tracking on the Console Mockup (triggers only on proximity/hover)
+  const handleConsoleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!consoleRef.current) return;
+    const rect = consoleRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const normX = (e.clientX - centerX) / (rect.width / 2);
+    const normY = (e.clientY - centerY) / (rect.height / 2);
+
+    const clampedX = Math.max(-1, Math.min(1, normX));
+    const clampedY = Math.max(-1, Math.min(1, normY));
+
+    // Controlled, subtle tilt
+    gsap.to(consoleRef.current, {
+      rotationY: clampedX * 1.5,
+      rotationX: -clampedY * 1.5,
+      transformPerspective: 1200,
+      ease: "power2.out",
+      duration: 0.5,
+      overwrite: "auto",
+    });
+
+    if (glowLimeRef.current) {
+      gsap.to(glowLimeRef.current, {
+        x: clampedX * 6,
+        y: clampedY * 6,
+        duration: 0.6,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    }
+  };
+
+  const handleConsoleMouseLeave = () => {
+    if (!consoleRef.current) return;
+    gsap.to(consoleRef.current, {
+      rotationY: 0,
+      rotationX: 0,
+      ease: "power3.out",
+      duration: 0.6,
+      overwrite: "auto",
+    });
+    if (glowLimeRef.current) {
+      gsap.to(glowLimeRef.current, {
+        x: 0,
+        y: 0,
+        duration: 0.6,
+        ease: "power3.out",
+        overwrite: "auto",
+      });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-white text-[#1d1d1d]">
+    <div ref={mainRef} className="min-h-screen bg-white text-[#1d1d1d] overflow-x-hidden">
       {/* ===================== HEADER ===================== */}
-      <header className="site-header" id="top">
+      <header
+        className="site-header"
+        id="top"
+        style={{
+          boxShadow: scrolled ? "0 10px 30px -10px rgba(0,0,0,0.08)" : "none",
+          transition: "box-shadow 0.3s ease, background 0.3s ease",
+          background: scrolled ? "rgba(255, 255, 255, 0.94)" : "rgba(255, 255, 255, 0.85)",
+        }}
+      >
         <nav className="nav container">
-          <a href="#top" className="brand" aria-label="Billenza home">
+          <a
+            href="#top"
+            className="brand"
+            aria-label="Billenza home"
+          >
             <span className="brand-word">Billenza</span>
           </a>
 
@@ -94,13 +432,15 @@ export default function BillenzaLanding() {
           </div>
 
           <div className="nav-right" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <a
+            <motion.a
               href={`${appUrl}?mode=login`}
               className="nav-link"
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.97 }}
               style={{ fontWeight: 600, fontSize: "0.9rem", color: "var(--ink)", padding: "6px 12px" }}
             >
               Sign In
-            </a>
+            </motion.a>
             <Link
               href="/#pricing"
               onClick={scrollToPricing}
@@ -116,49 +456,77 @@ export default function BillenzaLanding() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle navigation"
             >
-              <span></span>
-              <span></span>
-              <span></span>
+              <motion.span
+                animate={{
+                  rotate: mobileMenuOpen ? 45 : 0,
+                  y: mobileMenuOpen ? 7 : 0,
+                }}
+                transition={{ duration: 0.25 }}
+              />
+              <motion.span
+                animate={{
+                  opacity: mobileMenuOpen ? 0 : 1,
+                  x: mobileMenuOpen ? 12 : 0,
+                }}
+                transition={{ duration: 0.2 }}
+              />
+              <motion.span
+                animate={{
+                  rotate: mobileMenuOpen ? -45 : 0,
+                  y: mobileMenuOpen ? -7 : 0,
+                }}
+                transition={{ duration: 0.25 }}
+              />
             </button>
           </div>
         </nav>
 
-        {/* Mobile menu sheet */}
-        <div className={`mobile-sheet ${mobileMenuOpen ? "open" : ""}`}>
-          <a href="#features" onClick={() => setMobileMenuOpen(false)}>
-            Platform Features
-          </a>
-          <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>
-            How It Works
-          </a>
-          <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>
-            Pricing & Plans
-          </a>
-          <a href="#faq" onClick={() => setMobileMenuOpen(false)}>
-            FAQ
-          </a>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 14 }}>
-            <a
-              href={`${appUrl}?mode=login`}
-              className="pill"
-              style={{ justifyContent: "center", border: "1px solid var(--line)", background: "#fff", color: "var(--ink)" }}
+        {/* Mobile menu sheet with Motion AnimatePresence */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="mobile-sheet"
             >
-              Sign In
-            </a>
-            <Link
-              href="/#pricing"
-              onClick={(e) => {
-                setMobileMenuOpen(false);
-                scrollToPricing(e);
-              }}
-              className="pill pill-ink"
-              style={{ justifyContent: "center" }}
-            >
-              Get Started Free
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-        </div>
+              <a href="#features" onClick={() => setMobileMenuOpen(false)}>
+                Platform Features
+              </a>
+              <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>
+                How It Works
+              </a>
+              <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>
+                Pricing &amp; Plans
+              </a>
+              <a href="#faq" onClick={() => setMobileMenuOpen(false)}>
+                FAQ
+              </a>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 14 }}>
+                <a
+                  href={`${appUrl}?mode=login`}
+                  className="pill"
+                  style={{ justifyContent: "center", border: "1px solid var(--line)", background: "#fff", color: "var(--ink)" }}
+                >
+                  Sign In
+                </a>
+                <Link
+                  href="/#pricing"
+                  onClick={(e) => {
+                    setMobileMenuOpen(false);
+                    scrollToPricing(e);
+                  }}
+                  className="pill pill-ink"
+                  style={{ justifyContent: "center" }}
+                >
+                  Get Started Free
+                  <ArrowRight size={16} />
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* ===================== HERO ===================== */}
@@ -179,13 +547,19 @@ export default function BillenzaLanding() {
           </p>
 
           <div className="hero-actions">
-            <a href="#pricing" className="pill pill-ink pill-lg">
+            <a
+              href="#pricing"
+              className="pill pill-ink pill-lg"
+            >
               Get Started — ₹499/mo
               <span className="pill-arrow">
                 <ArrowRight size={20} />
               </span>
             </a>
-            <a href={appUrl} className="pill pill-ghost pill-lg">
+            <a
+              href={appUrl}
+              className="pill pill-ghost pill-lg"
+            >
               Launch App
               <span className="pill-arrow gray">
                 <ArrowRight size={20} />
@@ -193,12 +567,16 @@ export default function BillenzaLanding() {
             </a>
           </div>
 
-          {/* Hero Console Mockup with real app image */}
-          <div className="console-wrap">
-            <div className="glow glow-lime"></div>
-            <div className="glow glow-ink"></div>
+          {/* Hero Console Mockup with real app image and 3D parallax */}
+          <div
+            className="console-wrap"
+            onMouseMove={handleConsoleMouseMove}
+            onMouseLeave={handleConsoleMouseLeave}
+          >
+            <div ref={glowLimeRef} className="glow glow-lime"></div>
+            <div ref={glowInkRef} className="glow glow-ink"></div>
 
-            <div className="console">
+            <div ref={consoleRef} className="console">
               <div className="console-head">
                 <div className="console-id">
                   <div className="id-chip">
@@ -246,7 +624,7 @@ export default function BillenzaLanding() {
                 </div>
                 <div className="node">
                   <span className="ndot live"></span>
-                  GSTR-1 & 3B: Auto-Sync
+                  GSTR-1 &amp; 3B: Auto-Sync
                 </div>
                 <div className="node">
                   <span className="ndot live"></span>
@@ -262,29 +640,49 @@ export default function BillenzaLanding() {
       <section className="trust">
         <div className="container">
           <div className="trust-eyebrow">
-            BUILT FOR INDIAN SMES, EXPORTERS, MANUFACTURERS & CA FIRMS
+            BUILT FOR INDIAN SMES, EXPORTERS, MANUFACTURERS &amp; CA FIRMS
           </div>
           <div className="logos">
-            <div className="logo-badge">
+            <motion.div
+              className="logo-badge"
+              whileHover={{ y: -3, scale: 1.04, backgroundColor: "#fff" }}
+              transition={{ duration: 0.2 }}
+            >
               <ShieldCheck size={16} color="#22c55e" />
-              GSTN Compliant & Verified
-            </div>
-            <div className="logo-badge">
+              GSTN Compliant &amp; Verified
+            </motion.div>
+            <motion.div
+              className="logo-badge"
+              whileHover={{ y: -3, scale: 1.04, backgroundColor: "#fff" }}
+              transition={{ duration: 0.2 }}
+            >
               <Globe2 size={16} color="#1d1d1d" />
               22 Global Currencies
-            </div>
-            <div className="logo-badge">
+            </motion.div>
+            <motion.div
+              className="logo-badge"
+              whileHover={{ y: -3, scale: 1.04, backgroundColor: "#fff" }}
+              transition={{ duration: 0.2 }}
+            >
               <Building2 size={16} color="#1d1d1d" />
               Multi-GSTIN Architecture
-            </div>
-            <div className="logo-badge">
+            </motion.div>
+            <motion.div
+              className="logo-badge"
+              whileHover={{ y: -3, scale: 1.04, backgroundColor: "#fff" }}
+              transition={{ duration: 0.2 }}
+            >
               <FileText size={16} color="#1d1d1d" />
               Instant e-Way Bill JSON
-            </div>
-            <div className="logo-badge">
+            </motion.div>
+            <motion.div
+              className="logo-badge"
+              whileHover={{ y: -3, scale: 1.04, backgroundColor: "#fff" }}
+              transition={{ duration: 0.2 }}
+            >
               <BarChart3 size={16} color="#1d1d1d" />
-              Form 26Q & 27EQ Ready
-            </div>
+              Form 26Q &amp; 27EQ Ready
+            </motion.div>
           </div>
         </div>
       </section>
@@ -292,7 +690,13 @@ export default function BillenzaLanding() {
       {/* ===================== FEATURES GRID ===================== */}
       <section className="features" id="features">
         <div className="container">
-          <div className="sec-head">
+          <motion.div
+            className="sec-head"
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.6 }}
+          >
             <span className="eyebrow">ENTERPRISE INVOICING SUITE</span>
             <h2>Engineered For Flawless Tax Accuracy</h2>
             <p>
@@ -300,81 +704,82 @@ export default function BillenzaLanding() {
               automates your tax calculations, reconciliations, and filings from
               one clean control center.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="feature-grid">
-            {/* Feature 1 */}
-            <div className="feat">
-              <div className="feat-ic">
-                <FileText size={24} />
-              </div>
-              <h3>Tax Invoicing & e-Way Bills</h3>
-              <p>
-                Issue Tax Invoices, Bills of Supply, Proformas, and Delivery
-                Challans with automatic CGST, SGST, IGST, UTGST, and cess calculations.
-              </p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="feat">
-              <div className="feat-ic">
-                <Layers size={24} />
-              </div>
-              <h3>Automated GSTR Returns</h3>
-              <p>
-                Generate official GSTR-1 and GSTR-3B filing JSONs with one click.
-                Reconcile your inward supply purchases against GSTR-2B effortlessly.
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="feat">
-              <div className="feat-ic">
-                <Globe2 size={24} />
-              </div>
-              <h3>22 Global Currencies</h3>
-              <p>
-                Bill foreign clients in USD, EUR, GBP, AED, SGD, and 17 other currencies
-                with automatic INR conversion notes and statutory LUT compliance.
-              </p>
-            </div>
-
-            {/* Feature 4 */}
-            <div className="feat">
-              <div className="feat-ic">
-                <Package size={24} />
-              </div>
-              <h3>Inventory & Low-Stock Radar</h3>
-              <p>
-                Track product stock in real time. Set minimum threshold alerts and
-                deduct inventory automatically when an invoice is finalized.
-              </p>
-            </div>
-
-            {/* Feature 5 */}
-            <div className="feat">
-              <div className="feat-ic">
-                <Clock size={24} />
-              </div>
-              <h3>Party Outstanding & Ledger</h3>
-              <p>
-                Comprehensive aging analysis for every debtor. Send polite payment
-                reminders with dynamic UPI QR codes directly via WhatsApp or email.
-              </p>
-            </div>
-
-            {/* Feature 6 */}
-            <div className="feat">
-              <div className="feat-ic">
-                <ShieldCheck size={24} />
-              </div>
-              <h3>TDS & TCS Audit Reports</h3>
-              <p>
-                Full compliance with Section 194Q and 206C. Export Form 26Q and
-                Form 27EQ statements ready for quarterly income tax submissions.
-              </p>
-            </div>
-          </div>
+          <motion.div
+            className="feature-grid"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-40px" }}
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: 0.08,
+                },
+              },
+            }}
+          >
+            {[
+              {
+                icon: FileText,
+                title: "Tax Invoicing & e-Way Bills",
+                desc: "Issue Tax Invoices, Bills of Supply, Proformas, and Delivery Challans with automatic CGST, SGST, IGST, UTGST, and cess calculations.",
+              },
+              {
+                icon: Layers,
+                title: "Automated GSTR Returns",
+                desc: "Generate official GSTR-1 and GSTR-3B filing JSONs with one click. Reconcile your inward supply purchases against GSTR-2B effortlessly.",
+              },
+              {
+                icon: Globe2,
+                title: "22 Global Currencies",
+                desc: "Bill foreign clients in USD, EUR, GBP, AED, SGD, and 17 other currencies with automatic INR conversion notes and statutory LUT compliance.",
+              },
+              {
+                icon: Package,
+                title: "Inventory & Low-Stock Radar",
+                desc: "Track product stock in real time. Set minimum threshold alerts and deduct inventory automatically when an invoice is finalized.",
+              },
+              {
+                icon: Clock,
+                title: "Party Outstanding & Ledger",
+                desc: "Comprehensive aging analysis for every debtor. Send polite payment reminders with dynamic UPI QR codes directly via WhatsApp or email.",
+              },
+              {
+                icon: ShieldCheck,
+                title: "TDS & TCS Audit Reports",
+                desc: "Full compliance with Section 194Q and 206C. Export Form 26Q and Form 27EQ statements ready for quarterly income tax submissions.",
+              },
+            ].map((feature, idx) => {
+              const Icon = feature.icon;
+              return (
+                <motion.div
+                  key={idx}
+                  className="feat"
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+                  }}
+                  whileHover={{
+                    y: -6,
+                    boxShadow: "0 20px 42px -16px rgba(0, 0, 0, 0.14)",
+                    transition: { duration: 0.15, ease: "easeOut" },
+                  }}
+                >
+                  <motion.div
+                    className="feat-ic"
+                    whileHover={{ scale: 1.15, rotate: 6 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                  >
+                    <Icon size={24} />
+                  </motion.div>
+                  <h3>{feature.title}</h3>
+                  <p>{feature.desc}</p>
+                </motion.div>
+              );
+            })}
+          </motion.div>
         </div>
       </section>
 
@@ -383,19 +788,19 @@ export default function BillenzaLanding() {
         <div className="container">
           <div className="metrics-grid">
             <div className="metric">
-              <div className="m-num">₹500Cr+</div>
+              <div className="m-num" ref={metric1Ref}>₹500Cr+</div>
               <div className="m-lab">Total Invoiced Volume</div>
             </div>
             <div className="metric">
-              <div className="m-num">99.99%</div>
+              <div className="m-num" ref={metric2Ref}>99.99%</div>
               <div className="m-lab">Tax Calculation Accuracy</div>
             </div>
             <div className="metric">
-              <div className="m-num">&lt;20s</div>
+              <div className="m-num" ref={metric3Ref}>&lt;20s</div>
               <div className="m-lab">Average Time to Issue Bill</div>
             </div>
             <div className="metric">
-              <div className="m-num">22</div>
+              <div className="m-num" ref={metric4Ref}>22</div>
               <div className="m-lab">Global Currencies Supported</div>
             </div>
           </div>
@@ -405,14 +810,20 @@ export default function BillenzaLanding() {
       {/* ===================== HOW IT WORKS ===================== */}
       <section className="how" id="how-it-works">
         <div className="container">
-          <div className="sec-head">
+          <motion.div
+            className="sec-head"
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.6 }}
+          >
             <span className="eyebrow">SEAMLESS WORKFLOW</span>
             <h2>From Zero to First Invoice in 60 Seconds</h2>
             <p>
               Get started without long onboarding calls or complicated setups.
               Everything is pre-configured for Indian businesses.
             </p>
-          </div>
+          </motion.div>
 
           <div className="how-rows">
             {/* Step 1 */}
@@ -442,12 +853,16 @@ export default function BillenzaLanding() {
                     <span className="tick-icon">
                       <Check size={12} strokeWidth={3} />
                     </span>
-                    Bank account & UPI QR code embedding
+                    Bank account &amp; UPI QR code embedding
                   </li>
                 </ul>
               </div>
 
-              <div className="how-card">
+              <motion.div
+                className="how-card"
+                whileHover={{ y: -6, boxShadow: "0 28px 56px -24px rgba(0,0,0,0.22)" }}
+                transition={{ duration: 0.3 }}
+              >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: "var(--gray)" }}>PROFILE INITIALIZATION</span>
                   <span style={{ background: "var(--lime)", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6 }}>VERIFIED</span>
@@ -460,14 +875,14 @@ export default function BillenzaLanding() {
                     <span style={{ background: "#fff", border: "1px solid var(--line)", padding: "4px 8px", borderRadius: 6, fontSize: 11 }}>UPI ID: macenza@hdfc</span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* Step 2 */}
             <div className="how-row rev">
               <div className="how-copy">
                 <span className="step-no">STEP 02</span>
-                <h3>Add Items & Issue GST Bill</h3>
+                <h3>Add Items &amp; Issue GST Bill</h3>
                 <p>
                   Select existing inventory or add new products. Billenza automatically
                   detects whether to apply CGST + SGST (intra-state) or IGST (inter-state)
@@ -495,7 +910,11 @@ export default function BillenzaLanding() {
                 </ul>
               </div>
 
-              <div className="how-card">
+              <motion.div
+                className="how-card"
+                whileHover={{ y: -6, boxShadow: "0 28px 56px -24px rgba(0,0,0,0.22)" }}
+                transition={{ duration: 0.3 }}
+              >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: "var(--gray)" }}>INVOICE GENERATION</span>
                   <span style={{ background: "var(--lime)", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6 }}>TAX INVOICE</span>
@@ -514,14 +933,14 @@ export default function BillenzaLanding() {
                     <span style={{ color: "var(--ink)" }}>₹1,00,300.00</span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* Step 3 */}
             <div className="how-row">
               <div className="how-copy">
                 <span className="step-no">STEP 03</span>
-                <h3>One-Click GSTR & e-Way Exports</h3>
+                <h3>One-Click GSTR &amp; e-Way Exports</h3>
                 <p>
                   At tax filing time, click one button to generate portal-compliant
                   JSON files for GSTR-1 and GSTR-3B. Directly upload them to the GSTN portal
@@ -544,12 +963,16 @@ export default function BillenzaLanding() {
                     <span className="tick-icon">
                       <Check size={12} strokeWidth={3} />
                     </span>
-                    Instant bulk Excel & CSV exports for CAs
+                    Instant bulk Excel &amp; CSV exports for CAs
                   </li>
                 </ul>
               </div>
 
-              <div className="how-card">
+              <motion.div
+                className="how-card"
+                whileHover={{ y: -6, boxShadow: "0 28px 56px -24px rgba(0,0,0,0.22)" }}
+                transition={{ duration: 0.3 }}
+              >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: "var(--gray)" }}>GSTN EXPORT READY</span>
                   <span style={{ background: "var(--lime)", color: "var(--ink)", fontSize: 11, fontWeight: 700, padding: "3px 8px", borderRadius: 6 }}>VALIDATED</span>
@@ -563,7 +986,7 @@ export default function BillenzaLanding() {
                     </span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
@@ -572,18 +995,48 @@ export default function BillenzaLanding() {
       {/* ===================== PRICING ===================== */}
       <section className="pricing" id="pricing">
         <div className="container">
-          <div className="sec-head">
+          <motion.div
+            className="sec-head"
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.6 }}
+          >
             <span className="eyebrow">TRANSPARENT PRICING</span>
             <h2>Simple, Predictable Plans For Every Business</h2>
             <p>
               No hidden fees, no per-invoice penalties. Get unlimited invoicing
               and full GST compliance right out of the box.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="plans">
+          <motion.div
+            className="plans"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-40px" }}
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: 0.1,
+                },
+              },
+            }}
+          >
             {/* Plan 1: Monthly */}
-            <div className="plan">
+            <motion.div
+              className="plan"
+              variants={{
+                hidden: { opacity: 0, y: 30 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+              }}
+              whileHover={{
+                y: -5,
+                boxShadow: "0 22px 45px -18px rgba(0, 0, 0, 0.14)",
+                transition: { duration: 0.15, ease: "easeOut" },
+              }}
+            >
               <div className="plan-name">MONTHLY PRO</div>
               <div className="plan-price">
                 ₹499
@@ -598,19 +1051,19 @@ export default function BillenzaLanding() {
                   <span className="tick-icon">
                     <Check size={12} strokeWidth={3} />
                   </span>
-                  Unlimited GST Invoices & Delivery Challans
+                  Unlimited GST Invoices &amp; Delivery Challans
                 </li>
                 <li>
                   <span className="tick-icon">
                     <Check size={12} strokeWidth={3} />
                   </span>
-                  GSTR-1 & GSTR-3B JSON exports
+                  GSTR-1 &amp; GSTR-3B JSON exports
                 </li>
                 <li>
                   <span className="tick-icon">
                     <Check size={12} strokeWidth={3} />
                   </span>
-                  Real-time Inventory & Stock Radar
+                  Real-time Inventory &amp; Stock Radar
                 </li>
                 <li>
                   <span className="tick-icon">
@@ -622,13 +1075,16 @@ export default function BillenzaLanding() {
                   <span className="tick-icon">
                     <Check size={12} strokeWidth={3} />
                   </span>
-                  Standard Email & Chat Support
+                  Standard Email &amp; Chat Support
                 </li>
               </ul>
 
-              <button
+              <motion.button
                 type="button"
                 onClick={() => openCheckout('pro_monthly')}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                transition={{ duration: 0.12 }}
                 className="pill pill-ink plan-cta"
                 style={{ width: "100%", justifyContent: "center", cursor: "pointer", border: "none" }}
               >
@@ -636,12 +1092,29 @@ export default function BillenzaLanding() {
                 <span className="pill-arrow">
                   <ArrowRight size={18} />
                 </span>
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
 
             {/* Plan 2: Annual Pro (Featured) */}
-            <div className="plan featured">
-              <span className="pop">SAVE ~17% YEARLY</span>
+            <motion.div
+              className="plan featured"
+              variants={{
+                hidden: { opacity: 0, y: 30 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+              }}
+              whileHover={{
+                y: -6,
+                boxShadow: "0 28px 56px -20px rgba(0, 0, 0, 0.22)",
+                transition: { duration: 0.15, ease: "easeOut" },
+              }}
+            >
+              <motion.span
+                className="pop"
+                animate={{ scale: [1, 1.03, 1] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
+                SAVE ~17% YEARLY
+              </motion.span>
               <div className="plan-name">ANNUAL PRO</div>
               <div className="plan-price">
                 ₹4,999
@@ -662,7 +1135,7 @@ export default function BillenzaLanding() {
                   <span className="tick-icon">
                     <Check size={12} strokeWidth={3} />
                   </span>
-                  <strong>Unlimited Business Profiles & GSTINs</strong>
+                  <strong>Unlimited Business Profiles &amp; GSTINs</strong>
                 </li>
                 <li>
                   <span className="tick-icon">
@@ -686,13 +1159,16 @@ export default function BillenzaLanding() {
                   <span className="tick-icon">
                     <Check size={12} strokeWidth={3} />
                   </span>
-                  Priority CA & Compliance Assistance
+                  Priority CA &amp; Compliance Assistance
                 </li>
               </ul>
 
-              <button
+              <motion.button
                 type="button"
                 onClick={() => openCheckout('pro_yearly')}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                transition={{ duration: 0.12 }}
                 className="pill pill-lime plan-cta"
                 style={{ width: "100%", justifyContent: "center", fontWeight: 700, cursor: "pointer", border: "none" }}
               >
@@ -700,11 +1176,22 @@ export default function BillenzaLanding() {
                 <span className="pill-arrow">
                   <ArrowRight size={18} />
                 </span>
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
 
             {/* Plan 3: Custom / Enterprise */}
-            <div className="plan">
+            <motion.div
+              className="plan"
+              variants={{
+                hidden: { opacity: 0, y: 30 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+              }}
+              whileHover={{
+                y: -5,
+                boxShadow: "0 22px 45px -18px rgba(0, 0, 0, 0.14)",
+                transition: { duration: 0.15, ease: "easeOut" },
+              }}
+            >
               <div className="plan-name">CUSTOM ENTERPRISE</div>
               <div className="plan-price">Custom</div>
               <div className="plan-desc">
@@ -716,19 +1203,19 @@ export default function BillenzaLanding() {
                   <span className="tick-icon">
                     <Check size={12} strokeWidth={3} />
                   </span>
-                  Multi-Branch & Team Roles / Permissions
+                  Multi-Branch &amp; Team Roles / Permissions
                 </li>
                 <li>
                   <span className="tick-icon">
                     <Check size={12} strokeWidth={3} />
                   </span>
-                  Custom ERP & Accounting Integrations
+                  Custom ERP &amp; Accounting Integrations
                 </li>
                 <li>
                   <span className="tick-icon">
                     <Check size={12} strokeWidth={3} />
                   </span>
-                  Dedicated CA & Account Manager
+                  Dedicated CA &amp; Account Manager
                 </li>
                 <li>
                   <span className="tick-icon">
@@ -740,7 +1227,7 @@ export default function BillenzaLanding() {
                   <span className="tick-icon">
                     <Check size={12} strokeWidth={3} />
                   </span>
-                  Custom SLA & 99.99% Uptime Guarantee
+                  Custom SLA &amp; 99.99% Uptime Guarantee
                 </li>
               </ul>
 
@@ -753,22 +1240,28 @@ export default function BillenzaLanding() {
                   <ArrowRight size={18} />
                 </span>
               </a>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* ===================== FAQ ===================== */}
       <section className="faq-section" id="faq">
         <div className="container">
-          <div className="sec-head">
+          <motion.div
+            className="sec-head"
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.6 }}
+          >
             <span className="eyebrow">COMMON QUESTIONS</span>
             <h2>Frequently Asked Questions</h2>
             <p>
               Got questions about billing, compliance, or account security?
               We&apos;ve got answers.
             </p>
-          </div>
+          </motion.div>
 
           <div className="faq-list">
             {[
@@ -793,23 +1286,39 @@ export default function BillenzaLanding() {
                 a: "Absolutely. You can export complete GSTR JSONs, CSV sales summaries, client ledger balance sheets, and inventory reports in one click to share with your CA.",
               },
             ].map((faq, idx) => (
-              <div
+              <motion.div
                 key={idx}
                 className="faq-item"
                 onClick={() => toggleFaq(idx)}
+                whileHover={{ y: -2, borderColor: "rgba(0, 0, 0, 0.25)" }}
+                layout
+                transition={{ duration: 0.2 }}
               >
                 <div className="faq-q">
                   <span>{faq.q}</span>
-                  <ChevronDown
-                    size={18}
-                    style={{
-                      transform: openFaq === idx ? "rotate(180deg)" : "none",
-                      transition: "transform 0.2s",
-                    }}
-                  />
+                  <motion.div
+                    animate={{ rotate: openFaq === idx ? 180 : 0 }}
+                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                    style={{ display: "inline-flex" }}
+                  >
+                    <ChevronDown size={18} />
+                  </motion.div>
                 </div>
-                {openFaq === idx && <div className="faq-a">{faq.a}</div>}
-              </div>
+                <AnimatePresence initial={false}>
+                  {openFaq === idx && (
+                    <motion.div
+                      key="content"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <div className="faq-a">{faq.a}</div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -818,7 +1327,13 @@ export default function BillenzaLanding() {
       {/* ===================== CTA BAND ===================== */}
       <section className="cta-band">
         <div className="container">
-          <div className="cta-inner">
+          <motion.div
+            className="cta-inner"
+            initial={{ opacity: 0, y: 30, scale: 0.98 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+          >
             <div className="hero-grid sm" aria-hidden="true"></div>
             <h2>Ready To Streamline Your GST Billing?</h2>
             <p>
@@ -836,7 +1351,7 @@ export default function BillenzaLanding() {
                 <ArrowRight size={20} />
               </span>
             </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -865,7 +1380,7 @@ export default function BillenzaLanding() {
               <h4>Platform</h4>
               <a href="#features">Tax Invoicing</a>
               <a href="#features">e-Way Bill Generator</a>
-              <a href="#features">GSTR-1 & 3B Filing</a>
+              <a href="#features">GSTR-1 &amp; 3B Filing</a>
               <a href="#features">Inventory Radar</a>
               <a href="#features">Multi-Currency Suite</a>
             </div>

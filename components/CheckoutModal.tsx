@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { X, ShieldCheck, ArrowRight, Loader2, AlertCircle, Sparkles, Building2, Mail, Lock } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface RazorpayPaymentResponse {
   razorpay_payment_id: string;
@@ -86,8 +87,6 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
     setPlan(initialPlan);
     onClose();
   };
-
-  if (!isOpen) return null;
 
   const isYearly = plan === 'pro_yearly';
   const planPrice = isYearly ? '₹4,999' : '₹499';
@@ -315,292 +314,537 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
   };
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 9999,
-      backgroundColor: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(6px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
-      fontFamily: 'inherit',
-    }}>
-      <div style={{
-        background: '#fff', borderRadius: 24, maxWidth: 500, width: '100%',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        border: '1px solid rgba(0,0,0,0.08)', overflow: 'hidden',
-        position: 'relative', animation: 'fadeIn 0.2s ease-out',
-      }}>
-        {/* Close Button */}
-        <button
-          onClick={handleClose}
-          type="button"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          key="checkout-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.22 }}
           style={{
-            position: 'absolute', top: 18, right: 18, width: 32, height: 32,
-            borderRadius: '50%', background: '#f1f5f9', border: 'none',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: '#64748b', transition: 'all 0.15s ease',
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            backgroundColor: 'rgba(0, 0, 0, 0.65)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            fontFamily: 'inherit',
           }}
-          aria-label="Close"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) handleClose();
+          }}
         >
-          <X size={18} />
-        </button>
-
-        {/* State 1: Active Subscription Already Detected */}
-        {activeSubFound && (
-          <div style={{ padding: '2.5rem 2rem', textAlign: 'center' }}>
-            <div style={{
-              width: 60, height: 60, borderRadius: '50%', background: '#ecfdf5',
-              color: '#059669', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: '1rem',
-            }}>
-              <ShieldCheck size={32} />
-            </div>
-            <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1d1d1d', margin: '0 0 8px' }}>
-              Active Subscription Found!
-            </h3>
-            <p style={{ fontSize: '0.9rem', color: '#64748b', margin: '0 0 1.5rem', lineHeight: 1.5 }}>
-              Your account (<strong>{email}</strong>) already has an active <strong>{activeSubFound.plan_tier === 'pro_yearly' ? 'Annual Pro' : 'Monthly Pro'}</strong> subscription. You do not need to pay again.
-            </p>
-            <a
-              href={`${appUrl}?mode=login`}
+          <motion.div
+            key="checkout-card"
+            initial={{ opacity: 0, scale: 0.93, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.93, y: 16 }}
+            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+            style={{
+              background: '#fff',
+              borderRadius: 24,
+              maxWidth: 500,
+              width: '100%',
+              boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.35)',
+              border: '1px solid rgba(0,0,0,0.08)',
+              overflow: 'hidden',
+              position: 'relative',
+            }}
+          >
+            {/* Close Button */}
+            <motion.button
+              onClick={handleClose}
+              type="button"
+              whileHover={{ scale: 1.1, rotate: 90 }}
+              whileTap={{ scale: 0.9 }}
               style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                width: '100%', padding: '0.9rem', borderRadius: 999, background: '#1d1d1d',
-                color: '#fff', fontWeight: 600, fontSize: '0.95rem', textDecoration: 'none',
+                position: 'absolute',
+                top: 18,
+                right: 18,
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                background: '#f1f5f9',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: '#64748b',
+                zIndex: 10,
               }}
+              aria-label="Close"
             >
-              Launch Billenza Workspace
-              <ArrowRight size={16} />
-            </a>
-          </div>
-        )}
+              <X size={18} />
+            </motion.button>
 
-        {/* State 2: Payment Successfully Completed */}
-        {!activeSubFound && paymentSuccess && (
-          <div style={{ padding: '2.5rem 2rem', textAlign: 'center' }}>
-            <div style={{
-              width: 64, height: 64, borderRadius: '50%', background: '#DCF986',
-              color: '#1D1D1D', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: '1rem',
-            }}>
-              <Sparkles size={32} />
-            </div>
-            <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1d1d1d', margin: '0 0 8px' }}>
-              Welcome to Billenza!
-            </h3>
-            <p style={{ fontSize: '0.9rem', color: '#64748b', margin: '0 0 1.5rem', lineHeight: 1.5 }}>
-              Your payment for <strong>{isYearly ? 'Billenza Pro Yearly' : 'Billenza Pro Monthly'}</strong> was successful. Your cloud workspace is now unlocked!
-            </p>
-            <a
-              href={`${appUrl}?mode=login`}
-              style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                width: '100%', padding: '0.9rem', borderRadius: 999, background: '#1d1d1d',
-                color: '#fff', fontWeight: 600, fontSize: '0.95rem', textDecoration: 'none',
-              }}
-            >
-              Open Your Billing Software
-              <ArrowRight size={16} />
-            </a>
-          </div>
-        )}
-
-        {/* State 3: Checkout Form */}
-        {!activeSubFound && !paymentSuccess && (
-          <div>
-            {/* Header */}
-            <div style={{ padding: '2rem 2rem 1.25rem', background: '#fafafa', borderBottom: '1px solid #eee' }}>
-              <span style={{
-                display: 'inline-block', fontSize: '0.7rem', fontWeight: 700,
-                color: 'var(--ink)', backgroundColor: 'var(--lime)', padding: '3px 10px',
-                borderRadius: 999, textTransform: 'uppercase', marginBottom: 8,
-              }}>
-                Instant Cloud Setup
-              </span>
-              <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1d1d1d', margin: '0 0 4px', letterSpacing: '0px' }}>
-                Complete Your Subscription
-              </h2>
-              <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0 }}>
-                Unlock unlimited GST billing, GSTR-1 JSON exports, and cloud syncing.
-              </p>
-            </div>
-
-            {/* Plan Switcher */}
-            <div style={{ padding: '1.25rem 2rem 0' }}>
-              <div style={{
-                display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10,
-              }}>
-                <button
-                  type="button"
-                  onClick={() => setPlan('pro_monthly')}
-                  style={{
-                    padding: '0.75rem 1rem', borderRadius: 14, textAlign: 'left',
-                    border: plan === 'pro_monthly' ? '2px solid #1d1d1d' : '1px solid #e2e8f0',
-                    background: plan === 'pro_monthly' ? '#fcfcfc' : '#fff', cursor: 'pointer',
-                  }}
+            <AnimatePresence mode="wait">
+              {/* State 1: Active Subscription Already Detected */}
+              {activeSubFound && (
+                <motion.div
+                  key="active-sub-found"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ padding: '2.5rem 2rem', textAlign: 'center' }}
                 >
-                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', height: 'var(--r)' }}>MONTHLY PRO</div>
-                  <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#1d1d1d' }}>₹499<span style={{ fontSize: '0.75rem', fontWeight: 400 }}> /mo</span></div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPlan('pro_yearly')}
-                  style={{
-                    padding: '0.75rem 1rem', borderRadius: 14, textAlign: 'left', position: 'relative',
-                    border: plan === 'pro_yearly' ? '2px solid #1d1d1d' : '1px solid #e2e8f0',
-                    background: plan === 'pro_yearly' ? '#fcfcfc' : '#fff', cursor: 'pointer',
-                  }}
-                >
-                  <span style={{
-                    position: 'absolute', top: -8, right: 8, background: '#DCF986',
-                    color: '#1d1d1d', fontSize: '0.6rem', fontWeight: 700, padding: '2px 6px',
-                    borderRadius: 999,
-                  }}>
-                    SAVE 17%
-                  </span>
-                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', height: 'var(--r)' }}>ANNUAL PRO</div>
-                  <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#1d1d1d' }}>₹4,999<span style={{ fontSize: '0.75rem', fontWeight: 400 }}> /yr</span></div>
-                </button>
-              </div>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleCheckout} style={{ padding: '1.25rem 2rem 2rem' }}>
-              {error && (
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '0.75rem 1rem',
-                  borderRadius: 10, background: '#fee2e2', color: '#dc2626',
-                  fontSize: '0.8rem', marginBottom: '1rem', textAlign: 'left',
-                }}>
-                  <AlertCircle size={16} style={{ flexShrink: 0 }} />
-                  <span>{error}</span>
-                </div>
+                  <div
+                    style={{
+                      width: 60,
+                      height: 60,
+                      borderRadius: '50%',
+                      background: '#ecfdf5',
+                      color: '#059669',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '1rem',
+                    }}
+                  >
+                    <ShieldCheck size={32} />
+                  </div>
+                  <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1d1d1d', margin: '0 0 8px' }}>
+                    Active Subscription Found!
+                  </h3>
+                  <p style={{ fontSize: '0.9rem', color: '#64748b', margin: '0 0 1.5rem', lineHeight: 1.5 }}>
+                    Your account (<strong>{email}</strong>) already has an active{' '}
+                    <strong>{activeSubFound.plan_tier === 'pro_yearly' ? 'Annual Pro' : 'Monthly Pro'}</strong>{' '}
+                    subscription. You do not need to pay again.
+                  </p>
+                  <motion.a
+                    href={`${appUrl}?mode=login`}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 8,
+                      width: '100%',
+                      padding: '0.9rem',
+                      borderRadius: 999,
+                      background: '#1d1d1d',
+                      color: '#fff',
+                      fontWeight: 600,
+                      fontSize: '0.95rem',
+                      textDecoration: 'none',
+                      boxShadow: '0 6px 18px rgba(0,0,0,0.18)',
+                    }}
+                  >
+                    Launch Billenza Workspace
+                    <ArrowRight size={16} />
+                  </motion.a>
+                </motion.div>
               )}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#334155', marginBottom: 4, letterSpacing: '0.5px' }}>
-                    Email Address <span style={{ color: '#ef4444' }}>*</span>
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <Mail size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#94a3b8' }} />
-                    <input
-                      type="email"
-                      required
-                      placeholder="name@company.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      style={{
-                        width: '100%', padding: '0.65rem 0.75rem 0.65rem 2.25rem',
-                        borderRadius: 10, border: '1px solid #cbd5e1', fontSize: '0.85rem',
-                        outline: 'none', boxSizing: 'border-box',
-                      }}
-                    />
+              {/* State 2: Payment Successfully Completed */}
+              {!activeSubFound && paymentSuccess && (
+                <motion.div
+                  key="payment-success"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ padding: '2.5rem 2rem', textAlign: 'center' }}
+                >
+                  <div
+                    style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: '50%',
+                      background: '#DCF986',
+                      color: '#1D1D1D',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '1rem',
+                    }}
+                  >
+                    <Sparkles size={32} />
                   </div>
-                </div>
+                  <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#1d1d1d', margin: '0 0 8px' }}>
+                    Welcome to Billenza!
+                  </h3>
+                  <p style={{ fontSize: '0.9rem', color: '#64748b', margin: '0 0 1.5rem', lineHeight: 1.5 }}>
+                    Your payment for <strong>{isYearly ? 'Billenza Pro Yearly' : 'Billenza Pro Monthly'}</strong> was
+                    successful. Your cloud workspace is now unlocked!
+                  </p>
+                  <motion.a
+                    href={`${appUrl}?mode=login`}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 8,
+                      width: '100%',
+                      padding: '0.9rem',
+                      borderRadius: 999,
+                      background: '#1d1d1d',
+                      color: '#fff',
+                      fontWeight: 600,
+                      fontSize: '0.95rem',
+                      textDecoration: 'none',
+                      boxShadow: '0 6px 18px rgba(0,0,0,0.18)',
+                    }}
+                  >
+                    Open Your Billing Software
+                    <ArrowRight size={16} />
+                  </motion.a>
+                </motion.div>
+              )}
 
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#334155', marginBottom: 4, letterSpacing: '0.5px' }}>
-                    Password <span style={{ color: '#ef4444' }}>*</span>
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <Lock size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#94a3b8' }} />
-                    <input
-                      type="password"
-                      required
-                      minLength={6}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+              {/* State 3: Checkout Form */}
+              {!activeSubFound && !paymentSuccess && (
+                <motion.div
+                  key="checkout-form-view"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {/* Header */}
+                  <div style={{ padding: '2rem 2rem 1.25rem', background: '#fafafa', borderBottom: '1px solid #eee' }}>
+                    <span
                       style={{
-                        width: '100%', padding: '0.65rem 0.75rem 0.65rem 2.25rem',
-                        borderRadius: 10, border: '1px solid #cbd5e1', fontSize: '0.85rem',
-                        outline: 'none', boxSizing: 'border-box',
+                        display: 'inline-block',
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        color: 'var(--ink)',
+                        backgroundColor: 'var(--lime)',
+                        padding: '3px 10px',
+                        borderRadius: 999,
+                        textTransform: 'uppercase',
+                        marginBottom: 8,
                       }}
-                    />
+                    >
+                      Instant Cloud Setup
+                    </span>
+                    <h2
+                      style={{
+                        fontSize: '1.4rem',
+                        fontWeight: 700,
+                        color: '#1d1d1d',
+                        margin: '0 0 4px',
+                        letterSpacing: '0px',
+                      }}
+                    >
+                      Complete Your Subscription
+                    </h2>
+                    <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0 }}>
+                      Unlock unlimited GST billing, GSTR-1 JSON exports, and cloud syncing.
+                    </p>
                   </div>
-                </div>
 
-                {authMode === 'signup' && (
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#334155', marginBottom: 4, letterSpacing: '0.5px' }}>
-                      Business / Company Name (Optional)
-                    </label>
-                    <div style={{ position: 'relative' }}>
-                      <Building2 size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#94a3b8' }} />
-                      <input
-                        type="text"
-                        placeholder="Macenza Technologies"
-                        value={businessName}
-                        onChange={(e) => setBusinessName(e.target.value)}
+                  {/* Plan Switcher */}
+                  <div style={{ padding: '1.25rem 2rem 0' }}>
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: 10,
+                      }}
+                    >
+                      <motion.button
+                        type="button"
+                        onClick={() => setPlan('pro_monthly')}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         style={{
-                          width: '100%', padding: '0.65rem 0.75rem 0.65rem 2.25rem',
-                          borderRadius: 10, border: '1px solid #cbd5e1', fontSize: '0.85rem',
-                          outline: 'none', boxSizing: 'border-box',
+                          padding: '0.75rem 1rem',
+                          borderRadius: 14,
+                          textAlign: 'left',
+                          border: plan === 'pro_monthly' ? '2px solid #1d1d1d' : '1px solid #e2e8f0',
+                          background: plan === 'pro_monthly' ? '#fcfcfc' : '#fff',
+                          cursor: 'pointer',
                         }}
-                      />
+                      >
+                        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', height: 'var(--r)' }}>
+                          MONTHLY PRO
+                        </div>
+                        <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#1d1d1d' }}>
+                          ₹499<span style={{ fontSize: '0.75rem', fontWeight: 400 }}> /mo</span>
+                        </div>
+                      </motion.button>
+
+                      <motion.button
+                        type="button"
+                        onClick={() => setPlan('pro_yearly')}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        style={{
+                          padding: '0.75rem 1rem',
+                          borderRadius: 14,
+                          textAlign: 'left',
+                          position: 'relative',
+                          border: plan === 'pro_yearly' ? '2px solid #1d1d1d' : '1px solid #e2e8f0',
+                          background: plan === 'pro_yearly' ? '#fcfcfc' : '#fff',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <span
+                          style={{
+                            position: 'absolute',
+                            top: -8,
+                            right: 8,
+                            background: '#DCF986',
+                            color: '#1d1d1d',
+                            fontSize: '0.6rem',
+                            fontWeight: 700,
+                            padding: '2px 6px',
+                            borderRadius: 999,
+                          }}
+                        >
+                          SAVE 17%
+                        </span>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', height: 'var(--r)' }}>
+                          ANNUAL PRO
+                        </div>
+                        <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#1d1d1d' }}>
+                          ₹4,999<span style={{ fontSize: '0.75rem', fontWeight: 400 }}> /yr</span>
+                        </div>
+                      </motion.button>
                     </div>
                   </div>
-                )}
-              </div>
 
-              {/* Mode switch */}
-              <div style={{ margin: '1rem 0', fontSize: '0.75rem', color: '#64748b', textAlign: 'center' }}>
-                {authMode === 'signup' ? (
-                  <span>
-                    Already have an account?{' '}
-                    <button
-                      type="button"
-                      onClick={() => setAuthMode('login')}
-                      style={{ color: '#1d1d1d', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                  {/* Form */}
+                  <form onSubmit={handleCheckout} style={{ padding: '1.25rem 2rem 2rem' }}>
+                    <AnimatePresence>
+                      {error && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -8, height: 0 }}
+                          animate={{ opacity: 1, y: 0, height: 'auto' }}
+                          exit={{ opacity: 0, y: -8, height: 0 }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            padding: '0.75rem 1rem',
+                            borderRadius: 10,
+                            background: '#fee2e2',
+                            color: '#dc2626',
+                            fontSize: '0.8rem',
+                            marginBottom: '1rem',
+                            textAlign: 'left',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                          <span>{error}</span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      <div>
+                        <label
+                          style={{
+                            display: 'block',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            color: '#334155',
+                            marginBottom: 4,
+                            letterSpacing: '0.5px',
+                          }}
+                        >
+                          Email Address <span style={{ color: '#ef4444' }}>*</span>
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                          <Mail size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#94a3b8' }} />
+                          <input
+                            type="email"
+                            required
+                            placeholder="name@company.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '0.65rem 0.75rem 0.65rem 2.25rem',
+                              borderRadius: 10,
+                              border: '1px solid #cbd5e1',
+                              fontSize: '0.85rem',
+                              outline: 'none',
+                              boxSizing: 'border-box',
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label
+                          style={{
+                            display: 'block',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            color: '#334155',
+                            marginBottom: 4,
+                            letterSpacing: '0.5px',
+                          }}
+                        >
+                          Password <span style={{ color: '#ef4444' }}>*</span>
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                          <Lock size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#94a3b8' }} />
+                          <input
+                            type="password"
+                            required
+                            minLength={6}
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '0.65rem 0.75rem 0.65rem 2.25rem',
+                              borderRadius: 10,
+                              border: '1px solid #cbd5e1',
+                              fontSize: '0.85rem',
+                              outline: 'none',
+                              boxSizing: 'border-box',
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {authMode === 'signup' && (
+                        <div>
+                          <label
+                            style={{
+                              display: 'block',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              color: '#334155',
+                              marginBottom: 4,
+                              letterSpacing: '0.5px',
+                            }}
+                          >
+                            Business / Company Name (Optional)
+                          </label>
+                          <div style={{ position: 'relative' }}>
+                            <Building2 size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#94a3b8' }} />
+                            <input
+                              type="text"
+                              placeholder="Macenza Technologies"
+                              value={businessName}
+                              onChange={(e) => setBusinessName(e.target.value)}
+                              style={{
+                                width: '100%',
+                                padding: '0.65rem 0.75rem 0.65rem 2.25rem',
+                                borderRadius: 10,
+                                border: '1px solid #cbd5e1',
+                                fontSize: '0.85rem',
+                                outline: 'none',
+                                boxSizing: 'border-box',
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Mode switch */}
+                    <div style={{ margin: '1rem 0', fontSize: '0.75rem', color: '#64748b', textAlign: 'center' }}>
+                      {authMode === 'signup' ? (
+                        <span>
+                          Already have an account?{' '}
+                          <button
+                            type="button"
+                            onClick={() => setAuthMode('login')}
+                            style={{
+                              color: '#1d1d1d',
+                              fontWeight: 600,
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                            }}
+                          >
+                            Sign in &amp; renew
+                          </button>
+                        </span>
+                      ) : (
+                        <span>
+                          New customer?{' '}
+                          <button
+                            type="button"
+                            onClick={() => setAuthMode('signup')}
+                            style={{
+                              color: '#1d1d1d',
+                              fontWeight: 600,
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                            }}
+                          >
+                            Create account
+                          </button>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Submit CTA */}
+                    <motion.button
+                      type="submit"
+                      disabled={loading}
+                      whileHover={loading ? {} : { scale: 1.02, boxShadow: '0 8px 24px rgba(0,0,0,0.22)' }}
+                      whileTap={loading ? {} : { scale: 0.98 }}
+                      style={{
+                        width: '100%',
+                        padding: '0.85rem',
+                        borderRadius: 999,
+                        background: '#1d1d1d',
+                        color: '#fff',
+                        fontWeight: 600,
+                        fontSize: '0.95rem',
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        border: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                        boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
+                      }}
                     >
-                      Sign in &amp; renew
-                    </button>
-                  </span>
-                ) : (
-                  <span>
-                    New customer?{' '}
-                    <button
-                      type="button"
-                      onClick={() => setAuthMode('signup')}
-                      style={{ color: '#1d1d1d', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                      {loading ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Connecting Gateway...
+                        </>
+                      ) : (
+                        <>
+                          Pay {planPrice} with Razorpay to Unlock
+                          <ArrowRight size={16} />
+                        </>
+                      )}
+                    </motion.button>
+
+                    <div
+                      style={{
+                        marginTop: '0.75rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        fontSize: '0.7rem',
+                        color: '#94a3b8',
+                      }}
                     >
-                      Create account
-                    </button>
-                  </span>
-                )}
-              </div>
-
-              {/* Submit CTA */}
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  width: '100%', padding: '0.85rem', borderRadius: 999, background: '#1d1d1d',
-                  color: '#fff', fontWeight: 600, fontSize: '0.95rem', cursor: loading ? 'not-allowed' : 'pointer',
-                  border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
-                }}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Connecting Gateway...
-                  </>
-                ) : (
-                  <>
-                    Pay {planPrice} with Razorpay to Unlock
-                    <ArrowRight size={16} />
-                  </>
-                )}
-              </button>
-
-              <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: '0.7rem', color: '#94a3b8' }}>
-                <ShieldCheck size={14} color="#059669" />
-                <span>256-bit encrypted • Razorpay Secured • Instant activation</span>
-              </div>
-            </form>
-          </div>
-        )}
-      </div>
-    </div>
+                      <ShieldCheck size={14} color="#059669" />
+                      <span>256-bit encrypted • Razorpay Secured • Instant activation</span>
+                    </div>
+                  </form>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
