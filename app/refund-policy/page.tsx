@@ -1,10 +1,10 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, AlertCircle, CheckCircle2, Mail, Phone } from 'lucide-react';
 
 export const metadata = {
   title: 'Cancellation & Refund Policy — Billenza',
-  description: 'Billenza cancellation terms, subscription renewal policies, and refund guidelines.',
+  description: 'Billenza cancellation terms, subscription renewal policies, duplicate charge refunds, and 60-day data removal timeline.',
 };
 
 export default function RefundPolicyPage() {
@@ -24,51 +24,88 @@ export default function RefundPolicyPage() {
         <div style={{ background: '#fff', borderRadius: 20, padding: '2.5rem', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#DCF986', padding: '4px 10px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700, marginBottom: '1rem' }}>
             <RefreshCw size={14} />
-            PAYMENTS &amp; REFUNDS
+            PAYMENTS, CANCELLATION &amp; REFUNDS
           </div>
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '0 0 1.5rem', letterSpacing: '-0.5px' }}>Cancellation &amp; Refund Policy</h1>
+          <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '0 0 0.5rem', letterSpacing: '-0.5px' }}>Cancellation &amp; Refund Policy</h1>
+          <p style={{ color: '#64748b', fontSize: '0.95rem', margin: '0 0 2rem' }}>
+            Official billing policies and cancellation procedures for Billenza, operated by Macenza (Sole Proprietorship: Shashank Shubham).
+          </p>
 
           <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>1. Subscription Cancellation</h2>
             <p>
-              You can request cancellation of your Billenza subscription at any time by sending an email directly to our support desk at <a href="mailto:support@billenza.com" style={{ color: '#1d1d1d', fontWeight: 600 }}>support@billenza.com</a>. Cancellations are processed manually by our support team. Upon cancellation, your account will remain active and fully accessible until the conclusion of your current paid billing period, and no further subscription charges will occur.
-            </p>
-          </section>
-
-          <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>2. 7-Day Money-Back Guarantee</h2>
-            <p>
-              We want you to be completely confident in choosing Billenza. If you subscribe to Billenza Pro (Monthly or Annual) and find that the software does not meet your business invoicing needs, you are eligible for a <strong>100% full refund within 7 days</strong> of your initial purchase date.
-            </p>
-          </section>
-
-          <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>3. How to Request a Refund (Email Only)</h2>
-            <p>
-              All refund requests must be submitted directly via contact email. To initiate a refund, please write to <a href="mailto:support@billenza.com" style={{ color: '#1d1d1d', fontWeight: 600 }}>support@billenza.com</a> from your registered account email address with the following details:
+              You may cancel your recurring Billenza subscription (Monthly Pro or Annual Pro) at any time. To cancel, you can:
             </p>
             <ul style={{ paddingLeft: '1.5rem', marginTop: '0.5rem' }}>
-              <li>Your registered account email address</li>
-              <li>Payment transaction reference ID or receipt number</li>
-              <li>Brief reason for the refund request</li>
+              <li>Manage and cancel your subscription directly from your Billenza account billing settings; or</li>
+              <li>Send a cancellation request from your registered account email to <a href="mailto:info@macenza.com" style={{ color: '#1d1d1d', fontWeight: 600 }}>info@macenza.com</a>.</li>
             </ul>
             <p style={{ marginTop: '0.5rem' }}>
-              Please note that refunds are not issued automatically or through self-service payment gateway portals; they are reviewed and processed directly by our customer support team upon receiving your email.
+              Upon cancellation, all future scheduled auto-debits and recurring billing cycles are immediately discontinued.
             </p>
           </section>
 
           <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>4. Refund Review &amp; Processing Time</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>2. Strict No-Refund Policy</h2>
+            <div style={{ background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: 12, padding: '1.25rem', margin: '1rem 0' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <AlertCircle size={20} color="#d97706" style={{ flexShrink: 0, marginTop: 2 }} />
+                <div>
+                  <strong style={{ color: '#92400e' }}>All Successful Payments Are Non-Refundable:</strong>
+                  <p style={{ margin: '4px 0 0', color: '#78350f', fontSize: '0.9rem' }}>
+                    Because Billenza provides immediate electronic provisioning of software access, tax computation engines, e-Way bill tools, and cloud storage upon transaction confirmation, <strong>all subscription charges (Monthly Pro at ₹499 and Annual Pro at ₹4,999) are strictly non-refundable</strong> once processed.
+                  </p>
+                </div>
+              </div>
+            </div>
             <p>
-              Our billing desk reviews email refund requests within <strong>24 to 48 business hours</strong>. Once approved, the refund will be credited back to your original source payment method (Bank Account, UPI ID, or Debit/Credit Card) within <strong>5 to 7 business days</strong>, subject to your bank&apos;s settlement timelines.
+              We do not provide pro-rated refunds, partial refunds, or credits for unused subscription time, mid-cycle cancellations, or downgraded accounts.
             </p>
           </section>
 
           <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>5. Duplicate Payments</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>3. Immediate Account Lock &amp; 60-Day Data Removal Grace Period</h2>
             <p>
-              If technical network latency causes a duplicate deduction for the same billing cycle, please email <a href="mailto:support@billenza.com" style={{ color: '#1d1d1d', fontWeight: 600 }}>support@billenza.com</a> with both transaction reference numbers. Our support team will verify the duplicate charge and process an immediate refund of the excess payment.
+              When a subscription period concludes without renewal or upon immediate cancellation:
             </p>
+            <ul style={{ paddingLeft: '1.5rem', marginTop: '0.5rem' }}>
+              <li><strong>Immediate Lock:</strong> Access to the invoicing console (<code>app.billenza.com</code>) is automatically locked. No new documents or reports can be created, and data access is locked.</li>
+              <li><strong>No Post-Cancellation Exports:</strong> Once access is locked, self-service data exports are disabled. Users are strictly required to export all invoices, GSTR JSONs, customer ledgers, and inventory records <strong>prior to the conclusion of their active paid subscription</strong>.</li>
+              <li><strong>60-Day Removal Grace Period:</strong> Stored tenant data remains locked in our secure database for a grace period of <strong>60 calendar days</strong> following expiration. If the subscription is not renewed within this 60-day window, all associated profile records, customer directories, inventory entries, and past invoices are <strong>permanently and irreversibly purged</strong> from our production servers and backups.</li>
+              <li><strong>Statutory Preservation Responsibility:</strong> Under Section 36 of the Central Goods and Services Tax (CGST) Act, 2017, taxpayers are legally obligated to preserve business accounts and tax invoices for a minimum of 72 months (6 years). Preserving and backing up your statutory tax documents remains your sole legal responsibility.</li>
+            </ul>
+          </section>
+
+          <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>4. Duplicate or Erroneous Transactions (5–7 Business Days Refund)</h2>
+            <p>
+              If a banking network timeout, payment gateway glitch, or system latency results in an accidental duplicate deduction for the same billing period:
+            </p>
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '1.25rem', margin: '1rem 0' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <CheckCircle2 size={20} color="#16a34a" style={{ flexShrink: 0, marginTop: 2 }} />
+                <div>
+                  <strong style={{ color: '#0f172a' }}>100% Refund for Verified Duplicate Debits:</strong>
+                  <p style={{ margin: '4px 0 0', color: '#475569', fontSize: '0.9rem' }}>
+                    Upon receiving your notification, our billing team will verify the redundant charge with our payment aggregator (Razorpay) and process a complete refund of the excess payment.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <p>
+              <strong>Refund Settlement Timeline:</strong> Once approved, the refund will be automatically credited back to your <strong>original source payment method</strong> (Bank Account, UPI ID, or Credit/Debit Card) within <strong>5 to 7 business days</strong>, subject to your issuing bank&apos;s standard clearing cycle.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '1rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>5. How to Report Duplicate Transactions</h2>
+            <p>To request a refund for a duplicate deduction, email our support desk:</p>
+            <div style={{ background: '#f8fafc', borderRadius: 12, padding: '1.25rem', border: '1px solid #e2e8f0', marginTop: '0.75rem', fontSize: '0.9rem', color: '#334155', lineHeight: 1.6 }}>
+              <div><strong>Email:</strong> <a href="mailto:info@macenza.com" style={{ color: '#1d1d1d', fontWeight: 600 }}>info@macenza.com</a></div>
+              <div><strong>Phone Support:</strong> <a href="tel:+919414660123" style={{ color: '#1d1d1d', fontWeight: 600 }}>+91 94146 60123</a></div>
+              <div><strong>Required Details:</strong> Registered account email, both Razorpay transaction reference numbers (Payment IDs), and date of debit.</div>
+              <div><strong>Response Turnaround:</strong> Within 24 to 48 business hours.</div>
+            </div>
           </section>
         </div>
       </main>

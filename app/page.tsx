@@ -1387,24 +1387,25 @@ export default function BillenzaLanding() {
 
             <div className="foot-col">
               <h4>Company</h4>
-              <a href="#top">About Billenza</a>
+              <Link href="/about">About Us</Link>
               <a href="#pricing">Pricing Plans</a>
               <a href="#faq">Compliance &amp; Security</a>
-              <a href="/contact">Support &amp; CA Desk</a>
+              <Link href="/contact">Contact &amp; Support</Link>
             </div>
 
             <div className="foot-col">
               <h4>Legal</h4>
-              <a href="/privacy">Privacy Policy</a>
-              <a href="/terms">Terms of Service</a>
-              <a href="/refund-policy">Refund Policy</a>
-              <a href="/contact">Contact &amp; Grievances</a>
+              <Link href="/privacy">Privacy Policy</Link>
+              <Link href="/terms">Terms of Service</Link>
+              <Link href="/refund-policy">Cancellation &amp; Refunds</Link>
+              <Link href="/shipping-policy">Shipping &amp; Delivery</Link>
+              <Link href="/contact">Grievance Redressal</Link>
             </div>
           </div>
 
           <div className="foot-base">
-            <div>&copy; 2026 Billenza Inc. All rights reserved.</div>
-            <div>Precision-engineered for Indian businesses &amp; global trade.</div>
+            <div>&copy; 2026 Macenza / Billenza. All rights reserved.</div>
+            <div>Operated by Macenza (Proprietor: Shashank Shubham) &bull; Ajmer, Rajasthan, India.</div>
           </div>
         </div>
       </footer>
