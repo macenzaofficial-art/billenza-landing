@@ -6,8 +6,7 @@ function getCorsHeaders(request: Request) {
   const allowedOrigins = [
     process.env.NEXT_PUBLIC_APP_URL,
     process.env.NEXT_PUBLIC_MARKETING_URL,
-    'http://localhost:3000',
-    'http://localhost:47371',
+    ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:3000', 'http://localhost:47371'] : []),
   ].filter(Boolean) as string[];
 
   const isAllowed = origin && allowedOrigins.some(allowed => allowed.replace(/\/$/, '') === origin.replace(/\/$/, ''));

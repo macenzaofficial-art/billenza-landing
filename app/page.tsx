@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import CheckoutModal from "../components/CheckoutModal";
 import {
@@ -15,9 +15,7 @@ import {
   Layers,
   BarChart3,
   Sparkles,
-  HelpCircle,
   Building2,
-  ExternalLink,
   Zap,
 } from "lucide-react";
 

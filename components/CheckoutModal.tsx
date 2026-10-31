@@ -1,12 +1,55 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { X, Check, ShieldCheck, ArrowRight, Loader2, AlertCircle, Sparkles, Building2, Mail, Lock } from 'lucide-react';
+import { X, ShieldCheck, ArrowRight, Loader2, AlertCircle, Sparkles, Building2, Mail, Lock } from 'lucide-react';
+
+interface RazorpayPaymentResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id?: string;
+  razorpay_subscription_id?: string;
+  razorpay_signature: string;
+}
+
+interface RazorpayFailureResponse {
+  error?: {
+    description?: string;
+    code?: string;
+    source?: string;
+    step?: string;
+    reason?: string;
+  };
+}
+
+interface RazorpayOptions {
+  key: string;
+  name: string;
+  description: string;
+  prefill?: {
+    email?: string;
+    name?: string;
+  };
+  theme?: {
+    color?: string;
+  };
+  modal?: {
+    ondismiss?: () => void;
+  };
+  handler: (response: RazorpayPaymentResponse) => void | Promise<void>;
+  subscription_id?: string;
+  order_id?: string;
+  amount?: number;
+  currency?: string;
+}
+
+interface RazorpayInstance {
+  open: () => void;
+  on: (event: string, handler: (resp: RazorpayFailureResponse) => void) => void;
+}
 
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
   }
 }
 
@@ -19,6 +62,12 @@ interface CheckoutModalProps {
 
 export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_monthly', appUrl }: CheckoutModalProps) {
   const [plan, setPlan] = useState<'pro_monthly' | 'pro_yearly'>(initialPlan);
+  const [prevInitialPlan, setPrevInitialPlan] = useState(initialPlan);
+  if (initialPlan !== prevInitialPlan) {
+    setPrevInitialPlan(initialPlan);
+    setPlan(initialPlan);
+  }
+
   const [authMode, setAuthMode] = useState<'signup' | 'login'>('signup');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,24 +78,19 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
   const [activeSubFound, setActiveSubFound] = useState<{ plan_tier: string } | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
-  useEffect(() => {
+  const handleClose = () => {
+    setError(null);
+    setActiveSubFound(null);
+    setPaymentSuccess(false);
+    setLoading(false);
     setPlan(initialPlan);
-  }, [initialPlan]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setError(null);
-      setActiveSubFound(null);
-      setPaymentSuccess(false);
-      setLoading(false);
-    }
-  }, [isOpen]);
+    onClose();
+  };
 
   if (!isOpen) return null;
 
   const isYearly = plan === 'pro_yearly';
   const planPrice = isYearly ? '₹4,999' : '₹499';
-  const planPeriod = isYearly ? 'year' : 'month';
 
   const loadRazorpaySDK = (): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -74,7 +118,7 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
 
     try {
       let currentUserId: string | null = null;
-      let currentUserEmail: string = email.trim().toLowerCase();
+      const currentUserEmail: string = email.trim().toLowerCase();
       let userToken: string | null = null;
 
       // 1. Authenticate or Register with Supabase Auth
@@ -104,13 +148,17 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
         // Auto-provision basic organization row (inactive by default)
         if (currentUserId) {
           try {
-            await supabase.from('organizations').upsert({
-              owner_id: currentUserId,
-              name: businessName.trim() || 'My Business',
-              subscription_status: 'inactive',
-              plan_tier: plan,
-              updated_at: new Date().toISOString(),
-            });
+            const { error: orgUpsertError } = await supabase.from('organizations').upsert(
+              {
+                owner_id: currentUserId,
+                business_name: businessName.trim() || 'My Business',
+                subscription_status: 'inactive',
+                plan_tier: plan,
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: 'owner_id' }
+            );
+            if (orgUpsertError) console.warn('Organization auto-provision note:', orgUpsertError);
           } catch (orgInitErr) {
             console.warn('Organization auto-provision note:', orgInitErr);
           }
@@ -181,7 +229,7 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
       }
 
       // 5. Open Razorpay Checkout Modal
-      const options: any = {
+      const options: RazorpayOptions = {
         key: orderData.keyId,
         name: 'Billenza',
         description: orderData.planName || (isYearly ? 'Billenza Pro Yearly — ₹4,999/yr' : 'Billenza Pro Monthly — ₹499/mo'),
@@ -193,7 +241,7 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
         modal: {
           ondismiss: () => setLoading(false),
         },
-        handler: async (response: any) => {
+        handler: async (response: RazorpayPaymentResponse) => {
           setLoading(true);
           try {
             // Secure server-side payment & signature verification
@@ -219,9 +267,10 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
             }
 
             setPaymentSuccess(true);
-          } catch (e: any) {
+          } catch (e: unknown) {
             console.error('Failed to verify active subscription:', e);
-            setError(e.message || 'Payment completed but failed to verify on server. Please contact support.');
+            const msg = e instanceof Error ? e.message : 'Payment completed but failed to verify on server. Please contact support.';
+            setError(msg);
           } finally {
             setLoading(false);
           }
@@ -237,13 +286,14 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
       }
 
       const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', (resp: any) => {
+      rzp.on('payment.failed', (resp: RazorpayFailureResponse) => {
         setError(resp.error?.description || 'Payment was declined or failed.');
         setLoading(false);
       });
       rzp.open();
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred during checkout.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'An unexpected error occurred during checkout.';
+      setError(msg);
       setLoading(false);
     }
   };
@@ -263,7 +313,7 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
       }}>
         {/* Close Button */}
         <button
-          onClick={onClose}
+          onClick={handleClose}
           type="button"
           style={{
             position: 'absolute', top: 18, right: 18, width: 32, height: 32,

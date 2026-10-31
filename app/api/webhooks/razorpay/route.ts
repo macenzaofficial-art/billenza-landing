@@ -35,6 +35,89 @@ async function findUserByEmail(admin: ReturnType<typeof getSupabaseAdmin>, email
   return null;
 }
 
+interface SaveSubscriptionParams {
+  userId: string;
+  subscriptionId: string;
+  customerId?: string;
+  planTier: 'pro_monthly' | 'pro_yearly';
+  currentPeriodEnd?: string | null;
+  eventTime: number;
+  existingOrg: {
+    subscription_status?: string | null;
+    razorpay_subscription_id?: string | null;
+    updated_at?: string | null;
+  } | null;
+  isRecurring: boolean;
+}
+
+async function saveActiveSubscription(
+  admin: ReturnType<typeof getSupabaseAdmin>,
+  params: SaveSubscriptionParams
+): Promise<{ error?: any; ignored?: string }> {
+  const { userId, subscriptionId, customerId, planTier, currentPeriodEnd, eventTime, existingOrg, isRecurring } = params;
+
+  if (existingOrg) {
+    const lastUpdated = existingOrg.updated_at ? new Date(existingOrg.updated_at).getTime() : 0;
+
+    // 1. Keep one-time order/payment events from overwriting an active recurring subscription
+    if (!isRecurring && existingOrg.subscription_status === 'active' && existingOrg.razorpay_subscription_id?.startsWith('sub_')) {
+      return { ignored: 'recurring_already_active' };
+    }
+
+    // 2. Reject stale events for earlier identifiers
+    if (existingOrg.razorpay_subscription_id && existingOrg.razorpay_subscription_id !== subscriptionId && eventTime < lastUpdated) {
+      return { ignored: 'stale_older_identifier' };
+    }
+
+    // 3. Reject stale events that occurred before cancellation
+    if (existingOrg.subscription_status === 'canceled' && eventTime <= lastUpdated) {
+      return { ignored: 'stale_before_cancellation' };
+    }
+
+    // 4. Atomic database update:
+    // If a user genuinely creates a new subscription after cancellation, allow reactivation
+    const isNewPurchase =
+      existingOrg.subscription_status === 'canceled' &&
+      existingOrg.razorpay_subscription_id !== subscriptionId &&
+      eventTime > lastUpdated;
+
+    let query = admin
+      .from('organizations')
+      .update({
+        razorpay_subscription_id: subscriptionId,
+        ...(customerId ? { razorpay_customer_id: customerId } : {}),
+        plan_tier: planTier,
+        subscription_status: 'active',
+        ...(currentPeriodEnd ? { current_period_end: currentPeriodEnd } : {}),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('owner_id', userId);
+
+    if (!isNewPurchase) {
+      // Atomic database-level guard: do not resurrect row if concurrently cancelled
+      query = query.neq('subscription_status', 'canceled');
+    }
+
+    const { error } = await query;
+    return { error };
+  } else {
+    // New user without existing organization row: upsert initial record
+    const { error } = await admin.from('organizations').upsert(
+      {
+        owner_id: userId,
+        razorpay_subscription_id: subscriptionId,
+        ...(customerId ? { razorpay_customer_id: customerId } : {}),
+        plan_tier: planTier,
+        subscription_status: 'active',
+        current_period_end: currentPeriodEnd || null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'owner_id' }
+    );
+    return { error };
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const signature = request.headers.get('x-razorpay-signature');
@@ -113,22 +196,40 @@ export async function POST(request: Request) {
         );
       }
 
+      const eventTime = (sub.created_at || payload.created_at || Date.now() / 1000) * 1000;
+      const { data: existingOrg, error: fetchOrgErr } = await admin
+        .from('organizations')
+        .select('subscription_status, razorpay_subscription_id, updated_at')
+        .eq('owner_id', userId)
+        .maybeSingle();
+
+      if (fetchOrgErr) {
+        console.error('Failed to query organization for subscription check:', fetchOrgErr);
+        return NextResponse.json({ error: 'Database check failed.' }, { status: 500 });
+      }
+
       const planTier = (sub.plan_id?.includes('year') || sub.notes?.plan_tier === 'pro_yearly')
         ? 'pro_yearly'
         : 'pro_monthly';
 
-      const { error: upsertError } = await admin.from('organizations').upsert({
-        owner_id: userId,
-        razorpay_subscription_id: sub.id,
-        razorpay_customer_id: sub.customer_id,
-        plan_tier: planTier,
-        subscription_status: 'active',
-        current_period_end: sub.current_end ? new Date(sub.current_end * 1000).toISOString() : null,
-        updated_at: new Date().toISOString(),
+      const result = await saveActiveSubscription(admin, {
+        userId,
+        subscriptionId: sub.id,
+        customerId: sub.customer_id,
+        planTier,
+        currentPeriodEnd: sub.current_end ? new Date(sub.current_end * 1000).toISOString() : null,
+        eventTime,
+        existingOrg,
+        isRecurring: true,
       });
 
-      if (upsertError) {
-        console.error('Failed to upsert organization in subscription webhook:', upsertError);
+      if (result.ignored) {
+        console.log(`Ignored subscription event (${result.ignored}):`, { subId: sub.id, userId });
+        return NextResponse.json({ status: `ignored_${result.ignored}`, event });
+      }
+
+      if (result.error) {
+        console.error('Failed to update organization in subscription webhook:', result.error);
         return NextResponse.json(
           { error: 'Failed to update organization subscription status.' },
           { status: 500 }
@@ -184,16 +285,34 @@ export async function POST(request: Request) {
         );
       }
 
-      const { error: upsertError } = await admin.from('organizations').upsert({
-        owner_id: userId,
-        razorpay_subscription_id: referenceId,
-        plan_tier: planTier,
-        subscription_status: 'active',
-        updated_at: new Date().toISOString(),
+      const eventTime = (order?.created_at || payment?.created_at || payload.created_at || Date.now() / 1000) * 1000;
+      const { data: existingOrg, error: fetchOrgErr } = await admin
+        .from('organizations')
+        .select('subscription_status, razorpay_subscription_id, updated_at')
+        .eq('owner_id', userId)
+        .maybeSingle();
+
+      if (fetchOrgErr) {
+        console.error('Failed to query organization for order check:', fetchOrgErr);
+        return NextResponse.json({ error: 'Database check failed.' }, { status: 500 });
+      }
+
+      const result = await saveActiveSubscription(admin, {
+        userId,
+        subscriptionId: referenceId,
+        planTier,
+        eventTime,
+        existingOrg,
+        isRecurring: false,
       });
 
-      if (upsertError) {
-        console.error('Failed to upsert organization in order/payment webhook:', upsertError);
+      if (result.ignored) {
+        console.log(`Ignored order/payment event (${result.ignored}):`, { referenceId, userId });
+        return NextResponse.json({ status: `ignored_${result.ignored}`, event });
+      }
+
+      if (result.error) {
+        console.error('Failed to upsert organization in order/payment webhook:', result.error);
         return NextResponse.json(
           { error: 'Failed to update organization subscription status.' },
           { status: 500 }

@@ -1,15 +1,57 @@
+import fs from 'fs';
 import crypto from 'crypto';
 
-const BASE_URL = process.env.TEST_URL || 'http://localhost:3000';
+// Conditionally load .env.local if present, preserving any existing environment variables
+if (fs.existsSync('.env.local') && typeof process.loadEnvFile === 'function') {
+  try {
+    process.loadEnvFile('.env.local');
+  } catch (err) {
+    // ignore
+  }
+}
+
+let BASE_URL = process.env.TEST_URL || 'http://localhost:3000';
 const WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET;
 
 console.log(`\n========================================`);
 console.log(`🧪 Running Billenza Security & API Tests`);
-console.log(`Target: ${BASE_URL}`);
 console.log(`========================================\n`);
+
+// Pre-flight server check
+async function verifyServerAvailable() {
+  const candidates = process.env.TEST_URL
+    ? [BASE_URL]
+    : [BASE_URL, 'http://127.0.0.1:3000'];
+  for (const url of candidates) {
+    try {
+      await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(2000) });
+      BASE_URL = url;
+      return true;
+    } catch {
+      // try next
+    }
+  }
+  return false;
+}
+
+const isOnline = await verifyServerAvailable();
+if (!isOnline) {
+  console.error(`❌ Connection failed: Next.js dev server is not reachable at ${BASE_URL}.`);
+  console.error(`👉 Please ensure your dev server is running ('npm run dev') in another terminal before testing.\n`);
+  process.exit(1);
+}
+
+console.log(`Target: ${BASE_URL}\n`);
 
 let passed = 0;
 let failed = 0;
+
+async function testFetch(endpoint, options = {}) {
+  return fetch(`${BASE_URL}${endpoint}`, {
+    ...options,
+    signal: options.signal || AbortSignal.timeout(5000),
+  });
+}
 
 async function runTest(name, fn) {
   process.stdout.write(`• ${name}... `);
@@ -29,7 +71,7 @@ function assert(condition, message) {
 
 // 1. Test create-subscription rejects unauthenticated requests
 await runTest('create-subscription rejects request without Bearer token', async () => {
-  const res = await fetch(`${BASE_URL}/api/razorpay/create-subscription`, {
+  const res = await testFetch('/api/razorpay/create-subscription', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ planTier: 'pro_monthly' }),
@@ -41,7 +83,7 @@ await runTest('create-subscription rejects request without Bearer token', async 
 
 // 2. Test create-subscription rejects unauthenticated body.userId impersonation attempt
 await runTest('create-subscription blocks unauthenticated body.userId bypass', async () => {
-  const res = await fetch(`${BASE_URL}/api/razorpay/create-subscription`, {
+  const res = await testFetch('/api/razorpay/create-subscription', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -50,13 +92,12 @@ await runTest('create-subscription blocks unauthenticated body.userId bypass', a
       planTier: 'pro_monthly',
     }),
   });
-  const data = await res.json();
   assert(res.status === 401, `Expected status 401, got ${res.status}`);
 });
 
 // 3. Test verify-payment rejects unauthenticated requests
 await runTest('verify-payment rejects request without Bearer token', async () => {
-  const res = await fetch(`${BASE_URL}/api/razorpay/verify-payment`, {
+  const res = await testFetch('/api/razorpay/verify-payment', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -70,7 +111,7 @@ await runTest('verify-payment rejects request without Bearer token', async () =>
 
 // 4. Test verify-payment blocks body.userId impersonation attempt
 await runTest('verify-payment blocks unauthenticated body.userId bypass', async () => {
-  const res = await fetch(`${BASE_URL}/api/razorpay/verify-payment`, {
+  const res = await testFetch('/api/razorpay/verify-payment', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -85,7 +126,7 @@ await runTest('verify-payment blocks unauthenticated body.userId bypass', async 
 
 // 5. Test verify-payment checks missing parameters
 await runTest('verify-payment requires paymentId and signature', async () => {
-  const res = await fetch(`${BASE_URL}/api/razorpay/verify-payment`, {
+  const res = await testFetch('/api/razorpay/verify-payment', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({}),
@@ -95,7 +136,7 @@ await runTest('verify-payment requires paymentId and signature', async () => {
 
 // 6. Test webhook rejects request without x-razorpay-signature
 await runTest('webhook rejects request without x-razorpay-signature header', async () => {
-  const res = await fetch(`${BASE_URL}/api/webhooks/razorpay`, {
+  const res = await testFetch('/api/webhooks/razorpay', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ event: 'payment.captured' }),
@@ -105,7 +146,7 @@ await runTest('webhook rejects request without x-razorpay-signature header', asy
 
 // 7. Test webhook rejects invalid signature
 await runTest('webhook rejects request with invalid HMAC signature', async () => {
-  const res = await fetch(`${BASE_URL}/api/webhooks/razorpay`, {
+  const res = await testFetch('/api/webhooks/razorpay', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -133,7 +174,7 @@ if (WEBHOOK_SECRET) {
 
     const signature = crypto.createHmac('sha256', WEBHOOK_SECRET).update(payload).digest('hex');
 
-    const res = await fetch(`${BASE_URL}/api/webhooks/razorpay`, {
+    const res = await testFetch('/api/webhooks/razorpay', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

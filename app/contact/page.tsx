@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Mail, MapPin, Clock, Phone, Building } from 'lucide-react';
+import { ArrowLeft, Mail, MapPin, Clock, Building } from 'lucide-react';
 
 export const metadata = {
   title: 'Contact Us & CA Desk — Billenza',

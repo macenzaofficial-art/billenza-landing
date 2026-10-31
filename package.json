@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:api": "node --env-file=.env.local scripts/test-api.mjs"
+    "test:api": "node scripts/test-api.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
