@@ -218,6 +218,7 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
                         businessName: companyTitle,
                         email: currentUserEmail,
                         isDefault: true,
+                        onboarded: false,
                       },
                       updated_at: new Date().toISOString(),
                     });
