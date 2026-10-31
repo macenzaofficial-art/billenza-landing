@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import CheckoutModal from "../components/CheckoutModal";
 import {
@@ -33,6 +34,15 @@ export default function BillenzaLanding() {
 
   const toggleFaq = (idx: number) => {
     setOpenFaq(openFaq === idx ? null : idx);
+  };
+
+  const scrollToPricing = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const el = document.getElementById('pricing');
+    if (el) {
+      e.preventDefault();
+      el.scrollIntoView({ behavior: 'smooth' });
+      window.history.pushState(null, '', '/#pricing');
+    }
   };
 
   return (
@@ -91,17 +101,16 @@ export default function BillenzaLanding() {
             >
               Sign In
             </a>
-            <button
-              type="button"
-              onClick={() => openCheckout('pro_monthly')}
+            <Link
+              href="/#pricing"
+              onClick={scrollToPricing}
               className="pill pill-ink nav-cta"
-              style={{ cursor: 'pointer', border: 'none' }}
             >
               Get Started
               <span className="pill-arrow" aria-hidden="true">
                 <ArrowRight size={18} />
               </span>
-            </button>
+            </Link>
             <button
               className={`hamburger ${mobileMenuOpen ? "open" : ""}`}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -136,18 +145,18 @@ export default function BillenzaLanding() {
             >
               Sign In
             </a>
-            <button
-              type="button"
-              onClick={() => {
+            <Link
+              href="/#pricing"
+              onClick={(e) => {
                 setMobileMenuOpen(false);
-                openCheckout('pro_monthly');
+                scrollToPricing(e);
               }}
               className="pill pill-ink"
-              style={{ justifyContent: "center", cursor: "pointer", border: "none" }}
+              style={{ justifyContent: "center" }}
             >
               Get Started Free
               <ArrowRight size={16} />
-            </button>
+            </Link>
           </div>
         </div>
       </header>
@@ -816,18 +825,17 @@ export default function BillenzaLanding() {
               Join thousands of Indian businesses generating compliant invoices
               and filing GSTR returns with ironclad confidence.
             </p>
-            <button
-              type="button"
-              onClick={() => openCheckout('pro_monthly')}
+            <Link
+              href="/#pricing"
+              onClick={scrollToPricing}
               id="footer-cta-btn"
               className="pill pill-lime pill-lg"
-              style={{ cursor: "pointer", border: "none" }}
             >
               Get Started Now — ₹499/mo
               <span className="pill-arrow">
                 <ArrowRight size={20} />
               </span>
-            </button>
+            </Link>
           </div>
         </div>
       </section>
