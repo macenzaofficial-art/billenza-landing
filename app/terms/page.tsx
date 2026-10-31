@@ -99,7 +99,7 @@ export default function TermsOfServicePage() {
             </p>
             <ul style={{ paddingLeft: '1.5rem', marginTop: '0.5rem' }}>
               <li>Access to the console (<code>app.billenza.com</code>) is immediately locked. Self-service data export features are disabled post-cancellation.</li>
-              <li>Users are strictly required to export and download all invoices, GSTR JSON files, and customer ledgers <strong>prior to subscription expiration</strong>.</li>
+              <li>Users are strictly required to export and download all invoices, GSTR reports, and database records using the built-in standard JSON Backup Export tool <strong>prior to subscription expiration</strong>.</li>
               <li>Your tenant data remains locked in our secure database for a grace period of <strong>60 calendar days</strong>. If unrenewed after 60 days, all cloud records are permanently deleted. Under Section 36 of the CGST Act, 2017, taxpayers are legally obligated to preserve business accounts and invoices for 72 months (6 years); preserving these records remains your statutory responsibility.</li>
             </ul>
           </section>
@@ -107,7 +107,7 @@ export default function TermsOfServicePage() {
           <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>6. Intellectual Property &amp; Customer Data Ownership</h2>
             <p>
-              <strong>Your Data:</strong> You retain 100% full legal ownership of your business data, customer directories, inventory records, and issued invoices. We claim no ownership over your proprietary business records.
+              <strong>Your Data:</strong> You retain 100% full legal ownership of your business data, customer directories, inventory records, and issued invoices. We claim no ownership over your proprietary business records. You may export and download your complete database in standard portable JSON format at any time while your subscription is active.
             </p>
             <p style={{ marginTop: '0.5rem' }}>
               <strong>Platform Property:</strong> Macenza retains all exclusive right, title, interest, copyrights, source code, design assets, and trademarks associated with Billenza. You may not reverse-engineer, decompile, resell, or distribute the platform software.

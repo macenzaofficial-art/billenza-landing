@@ -89,9 +89,9 @@ export default function PrivacyPolicyPage() {
               </div>
 
               <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-                <strong style={{ color: '#0f172a' }}>G. Optional Google Drive Synchronization Tokens</strong>
+                <strong style={{ color: '#0f172a' }}>G. Data Portability &amp; Client-Side JSON Backup Exports</strong>
                 <p style={{ margin: '4px 0 0', color: '#475569', fontSize: '0.9rem' }}>
-                  If you voluntarily connect Google Drive for automatic invoice PDF archiving, we handle Google Identity Services (GIS) OAuth2 tokens scoped exclusively to <code>https://www.googleapis.com/auth/drive.file</code>. This scope permits saving files solely inside your dedicated Google Drive folder; we cannot view, modify, or delete any other files in your Drive.
+                  Billenza provides full client-side data portability: you can export and download an unencrypted standard JSON backup of your entire business database (business profiles, invoices, customers, vendors, inventory catalogue, and expense ledgers) to your device at any time directly through your web browser. Billenza operates strictly within web browser security standards and does not access, scan, or monitor your local computer or device storage folders. All database exports and imports are initiated and controlled exclusively by you.
                 </p>
               </div>
 
@@ -110,6 +110,7 @@ export default function PrivacyPolicyPage() {
             <ul style={{ paddingLeft: '1.5rem', marginTop: '0.5rem' }}>
               <li>Generating mathematically accurate GST tax invoices, bills of supply, and e-Way bills.</li>
               <li>Compiling GSTR-1, GSTR-3B JSON exports, and GSTR-2B ITC reconciliation schedules.</li>
+              <li>Providing self-service data portability via standard JSON database export and import tools.</li>
               <li>Authenticating your session and maintaining strict multi-tenant isolation.</li>
               <li>Processing subscription billing mandates through Razorpay.</li>
               <li>Delivering transaction receipts, security notices, and statutory updates.</li>
