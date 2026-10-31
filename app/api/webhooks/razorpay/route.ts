@@ -54,6 +54,7 @@ interface SaveSubscriptionParams {
   currentPeriodEnd?: string | null;
   eventTime: number;
   existingOrg: {
+    id: string;
     subscription_status?: string | null;
     razorpay_subscription_id?: string | null;
     updated_at?: string | null;
@@ -67,7 +68,7 @@ async function saveActiveSubscription(
 ): Promise<{ error?: unknown; ignored?: string }> {
   const { userId, subscriptionId, customerId, planTier, currentPeriodEnd, eventTime, existingOrg, isRecurring } = params;
 
-  if (existingOrg) {
+  if (existingOrg?.id) {
     const lastUpdated = existingOrg.updated_at ? new Date(existingOrg.updated_at).getTime() : 0;
 
     // 1. Keep one-time order/payment events from overwriting an active recurring subscription
@@ -102,7 +103,7 @@ async function saveActiveSubscription(
         ...(currentPeriodEnd ? { current_period_end: currentPeriodEnd } : {}),
         updated_at: new Date().toISOString(),
       })
-      .eq('owner_id', userId);
+      .eq('id', existingOrg.id);
 
     if (!isNewPurchase) {
       // Atomic database-level guard: do not resurrect row if concurrently cancelled
@@ -112,19 +113,32 @@ async function saveActiveSubscription(
     const { error } = await query;
     return { error };
   } else {
-    // New user without existing organization row: upsert initial record
-    const { error } = await admin.from('organizations').upsert(
-      {
-        owner_id: userId,
-        razorpay_subscription_id: subscriptionId,
-        ...(customerId ? { razorpay_customer_id: customerId } : {}),
-        plan_tier: planTier,
-        subscription_status: 'active',
-        current_period_end: currentPeriodEnd || null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'owner_id' }
-    );
+    // New user without existing organization row: insert initial record
+    const { error } = await admin.from('organizations').insert({
+      owner_id: userId,
+      razorpay_subscription_id: subscriptionId,
+      ...(customerId ? { razorpay_customer_id: customerId } : {}),
+      plan_tier: planTier,
+      subscription_status: 'active',
+      current_period_end: currentPeriodEnd || null,
+      updated_at: new Date().toISOString(),
+    });
+
+    // If concurrent insert already created the record, update that record instead of failing
+    if (error && (error as { code?: string }).code === '23505') {
+      const { error: updateError } = await admin
+        .from('organizations')
+        .update({
+          subscription_status: 'active',
+          plan_tier: planTier,
+          ...(customerId ? { razorpay_customer_id: customerId } : {}),
+          ...(currentPeriodEnd ? { current_period_end: currentPeriodEnd } : {}),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('razorpay_subscription_id', subscriptionId);
+      return { error: updateError };
+    }
+
     return { error };
   }
 }
@@ -210,8 +224,10 @@ export async function POST(request: Request) {
       const eventTime = (sub.created_at || payload.created_at || Date.now() / 1000) * 1000;
       const { data: existingOrg, error: fetchOrgErr } = await admin
         .from('organizations')
-        .select('subscription_status, razorpay_subscription_id, updated_at')
+        .select('id, subscription_status, razorpay_subscription_id, updated_at')
         .eq('owner_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (fetchOrgErr) {
@@ -352,8 +368,10 @@ export async function POST(request: Request) {
       const eventTime = (order?.created_at || payment?.created_at || payload.created_at || Date.now() / 1000) * 1000;
       const { data: existingOrg, error: fetchOrgErr } = await admin
         .from('organizations')
-        .select('subscription_status, razorpay_subscription_id, updated_at')
+        .select('id, subscription_status, razorpay_subscription_id, updated_at')
         .eq('owner_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (fetchOrgErr) {

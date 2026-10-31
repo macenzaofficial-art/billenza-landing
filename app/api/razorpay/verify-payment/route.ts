@@ -28,7 +28,10 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { orderId, subscriptionId, paymentId, signature } = body;
+    const orderId = typeof body.orderId === 'string' ? body.orderId.trim() : undefined;
+    const subscriptionId = typeof body.subscriptionId === 'string' ? body.subscriptionId.trim() : undefined;
+    const paymentId = typeof body.paymentId === 'string' ? body.paymentId.trim() : undefined;
+    const signature = typeof body.signature === 'string' ? body.signature.trim() : undefined;
 
     if (!paymentId || !signature) {
       return NextResponse.json(
@@ -240,19 +243,65 @@ export async function POST(request: Request) {
     }
 
     // 8. Update Supabase organization record securely via admin client
-    const { error: upsertError } = await admin.from('organizations').upsert(
-      {
-        owner_id: verifiedUserId,
-        subscription_status: 'active',
-        plan_tier: resolvedTier,
-        razorpay_subscription_id: targetSubId,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'owner_id' }
-    );
+    const { data: existingUserOrg, error: findUserOrgErr } = await admin
+      .from('organizations')
+      .select('id')
+      .eq('owner_id', verifiedUserId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (upsertError) {
-      console.error('Failed to update organization subscription:', upsertError);
+    if (findUserOrgErr) {
+      console.error('Failed to locate organization for user:', findUserOrgErr);
+      return NextResponse.json(
+        { error: 'Payment verified, but database update failed. Our team has been alerted.' },
+        { status: 500, headers: corsHeaders }
+      );
+    }
+
+    let saveOrgError = null;
+    if (existingUserOrg?.id) {
+      const { error: updateErr } = await admin
+        .from('organizations')
+        .update({
+          subscription_status: 'active',
+          plan_tier: resolvedTier,
+          razorpay_subscription_id: targetSubId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingUserOrg.id);
+      saveOrgError = updateErr;
+    } else {
+      const { error: insertErr } = await admin
+        .from('organizations')
+        .insert({
+          owner_id: verifiedUserId,
+          subscription_status: 'active',
+          plan_tier: resolvedTier,
+          razorpay_subscription_id: targetSubId,
+          updated_at: new Date().toISOString(),
+        });
+
+      // If a concurrent webhook already inserted this record, recover idempotently
+      if (insertErr && (insertErr as { code?: string }).code === '23505') {
+        const { data: alreadyInsertedOrg } = await admin
+          .from('organizations')
+          .select('id, subscription_status, owner_id')
+          .eq('razorpay_subscription_id', targetSubId)
+          .maybeSingle();
+
+        if (alreadyInsertedOrg && alreadyInsertedOrg.owner_id === verifiedUserId) {
+          saveOrgError = null;
+        } else {
+          saveOrgError = insertErr;
+        }
+      } else {
+        saveOrgError = insertErr;
+      }
+    }
+
+    if (saveOrgError) {
+      console.error('Failed to update organization subscription:', saveOrgError);
       return NextResponse.json(
         { error: 'Payment verified, but database update failed. Our team has been alerted.' },
         { status: 500, headers: corsHeaders }

@@ -148,17 +148,33 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
         // Auto-provision basic organization row (inactive by default)
         if (currentUserId) {
           try {
-            const { error: orgUpsertError } = await supabase.from('organizations').upsert(
-              {
-                owner_id: currentUserId,
-                business_name: businessName.trim() || 'My Business',
-                subscription_status: 'inactive',
-                plan_tier: plan,
-                updated_at: new Date().toISOString(),
-              },
-              { onConflict: 'owner_id' }
-            );
-            if (orgUpsertError) console.warn('Organization auto-provision note:', orgUpsertError);
+            const { data: existingOrg } = await supabase
+              .from('organizations')
+              .select('id')
+              .eq('owner_id', currentUserId)
+              .maybeSingle();
+
+            if (existingOrg?.id) {
+              const { error: orgUpdateError } = await supabase
+                .from('organizations')
+                .update({
+                  business_name: businessName.trim() || 'My Business',
+                  updated_at: new Date().toISOString(),
+                })
+                .eq('id', existingOrg.id);
+              if (orgUpdateError) console.warn('Organization auto-provision note:', orgUpdateError);
+            } else {
+              const { error: orgInsertError } = await supabase
+                .from('organizations')
+                .insert({
+                  owner_id: currentUserId,
+                  business_name: businessName.trim() || 'My Business',
+                  subscription_status: 'inactive',
+                  plan_tier: plan,
+                  updated_at: new Date().toISOString(),
+                });
+              if (orgInsertError) console.warn('Organization auto-provision note:', orgInsertError);
+            }
           } catch (orgInitErr) {
             console.warn('Organization auto-provision note:', orgInitErr);
           }

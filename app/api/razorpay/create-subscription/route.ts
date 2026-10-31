@@ -27,10 +27,10 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const planTier = body.planTier || (body.planId?.includes('year') ? 'pro_yearly' : 'pro_monthly');
+    const planTier: 'pro_monthly' | 'pro_yearly' = body.planTier === 'pro_yearly' ? 'pro_yearly' : 'pro_monthly';
     const inputEmail = (body.email || '').trim().toLowerCase();
-    const phone = body.phone || '';
-    const name = body.name || '';
+    const phone = typeof body.phone === 'string' ? body.phone.slice(0, 30) : '';
+    const name = typeof body.name === 'string' ? body.name.slice(0, 100) : '';
 
     // Authenticate user strictly via verified Supabase auth token
     let verifiedUserId: string | null = null;
