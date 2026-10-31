@@ -1,35 +1,44 @@
 import React from 'react';
-import Link from 'next/link';
-import { ArrowLeft, Truck, CheckCircle2, ShieldCheck, Mail, Phone, Clock } from 'lucide-react';
+import type { Metadata } from 'next';
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
+import Breadcrumbs from '../../components/Breadcrumbs';
+import { Truck, CheckCircle2, ShieldCheck, Mail, Phone, Clock } from 'lucide-react';
 
-export const metadata = {
-  title: 'Shipping & Delivery Policy — Billenza',
-  description: 'Digital service fulfillment terms and instant provisioning policy for Billenza GST Billing SaaS.',
+export const metadata: Metadata = {
+  title: 'Shipping & Delivery Policy — Billenza | Macenza',
+  description:
+    'Digital service fulfillment terms and instant electronic provisioning policy for Billenza GST Billing SaaS.',
+  alternates: {
+    canonical: 'https://billenza.com/shipping-policy',
+  },
 };
 
 export default function ShippingPolicyPage() {
   return (
-    <div style={{ minHeight: '100vh', background: '#fafafa', color: '#1d1d1d', fontFamily: 'inherit' }}>
-      <header style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #e2e8f0', background: '#fff' }}>
-        <div style={{ maxWidth: 840, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none', color: '#1d1d1d', fontWeight: 600, fontSize: '0.9rem' }}>
-            <ArrowLeft size={16} />
-            Back to Billenza
-          </Link>
-          <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Last updated: October 2026</span>
-        </div>
-      </header>
+    <div className="min-h-screen bg-white text-[#1d1d1d]">
+      <Navbar />
 
-      <main style={{ maxWidth: 840, margin: '2.5rem auto', padding: '0 1.5rem 4rem' }}>
-        <div style={{ background: '#fff', borderRadius: 20, padding: '2.5rem', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#DCF986', padding: '4px 10px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700, marginBottom: '1rem' }}>
-            <Truck size={14} />
-            DIGITAL FULFILLMENT &amp; SERVICE DELIVERY
+      <section className="sub-hero">
+        <div className="sub-hero-grid" aria-hidden="true"></div>
+        <div className="container sub-hero-content">
+          <Breadcrumbs items={[{ label: 'Shipping & Delivery Policy' }]} />
+          <div className="badge-chip lime">
+            <Truck size={13} /> 100% DIGITAL SAAS PROVISIONING
           </div>
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 700, margin: '0 0 0.5rem' }}>Shipping &amp; Delivery Policy</h1>
-          <p style={{ color: '#64748b', fontSize: '0.95rem', margin: '0 0 2rem' }}>
-            Digital Service Delivery &amp; Subscription Fulfillment Terms for Billenza, a product of Macenza.
+          <h1>Shipping &amp; Delivery Policy</h1>
+          <p className="sub-hero-desc">
+            Digital Service Delivery &amp; Subscription Fulfillment Terms for Billenza, operated by Macenza.
           </p>
+        </div>
+      </section>
+
+      <main style={{ maxWidth: 900, margin: '48px auto', padding: '0 24px 64px' }}>
+        <div className="card-premium">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--line-soft)', paddingBottom: 16, marginBottom: 24 }}>
+            <span style={{ fontSize: 13, color: 'var(--gray)', fontWeight: 600 }}>Operating Entity: Macenza</span>
+            <span style={{ fontSize: 13, color: 'var(--gray)' }}>Last Revised: October 2026</span>
+          </div>
 
           <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>1. 100% Digital Service Delivery (No Physical Shipping)</h2>
@@ -117,6 +126,8 @@ export default function ShippingPolicyPage() {
           </section>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

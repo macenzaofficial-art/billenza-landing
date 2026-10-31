@@ -1173,3 +1173,349 @@ div.console-wrap:nth-of-type(2) > div.console:nth-of-type(3) > div.console-statu
   .hero { padding-top: 24px; }
   .console { padding: 14px; }
 }
+
+/* ==========================================================================
+   MULTI-PAGE EXTENSIONS: SUB-HEROES, BREADCRUMBS, COMPARISONS, CALCULATORS
+   ========================================================================== */
+
+/* ---------- Subpage Hero ---------- */
+.sub-hero {
+  position: relative;
+  padding: 56px 0 48px;
+  background: radial-gradient(circle at 50% 0%, rgba(220, 249, 134, 0.18) 0%, rgba(255, 255, 255, 0) 70%),
+              linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+  border-bottom: 1px solid var(--line-soft);
+  overflow: hidden;
+}
+
+.sub-hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at 50% 20%, #000 40%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 20%, #000 40%, transparent 80%);
+  pointer-events: none;
+}
+
+.sub-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 860px;
+}
+
+.sub-hero h1 {
+  font-size: clamp(32px, 4.5vw, 52px);
+  margin: 18px 0 16px;
+  line-height: 1.12;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.sub-hero-desc {
+  font-size: clamp(16px, 1.8vw, 19px);
+  color: var(--gray);
+  line-height: 1.6;
+  max-width: 720px;
+  margin-bottom: 28px;
+}
+
+/* ---------- Breadcrumbs ---------- */
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #71717a;
+  margin-bottom: 16px;
+}
+
+.breadcrumbs a {
+  color: #52525b;
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.breadcrumbs a:hover {
+  color: var(--ink);
+}
+
+.breadcrumbs .sep {
+  opacity: 0.4;
+  font-size: 11px;
+}
+
+.breadcrumbs .current {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ---------- Badges & Chips ---------- */
+.badge-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--bone);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.badge-chip.lime {
+  background: var(--lime);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--ink);
+}
+
+.badge-chip.ink {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+.badge-chip.orange {
+  background: rgba(255, 140, 66, 0.12);
+  color: #d95a12;
+  border-color: rgba(255, 140, 66, 0.3);
+}
+
+/* ---------- Cards & Panels ---------- */
+.card-premium {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 32px;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-premium:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.07);
+  border-color: rgba(0, 0, 0, 0.18);
+}
+
+.card-dark {
+  background: var(--ink);
+  color: #ffffff;
+  border-radius: 20px;
+  padding: 36px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ---------- Comparison Matrix Table ---------- */
+.compare-container {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
+  -webkit-overflow-scrolling: touch;
+}
+
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14.5px;
+}
+
+.compare-table th {
+  padding: 18px 20px;
+  background: #fafafa;
+  border-bottom: 2px solid var(--line);
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 13.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.compare-table th.highlight {
+  background: var(--lime);
+  color: var(--ink);
+  border-bottom-color: rgba(0, 0, 0, 0.15);
+}
+
+.compare-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line-soft);
+  vertical-align: middle;
+}
+
+.compare-table tr:last-child td {
+  border-bottom: none;
+}
+
+.compare-table tr:hover td {
+  background: #fafafa;
+}
+
+.compare-table td.highlight {
+  background: rgba(220, 249, 134, 0.14);
+  font-weight: 600;
+}
+
+.check-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.cross-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+
+/* ---------- Interactive Calculator Styles ---------- */
+.calc-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.08);
+  padding: 36px;
+}
+
+.calc-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.calc-input-group label {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.calc-input {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 20px;
+  font-weight: 600;
+  font-family: inherit;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: #fafafa;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.calc-input:focus {
+  border-color: var(--ink);
+  background: #ffffff;
+}
+
+.slab-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.slab-btn {
+  padding: 12px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fafafa;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.slab-btn:hover {
+  background: var(--bone);
+  border-color: var(--ink);
+}
+
+.slab-btn.active {
+  background: var(--ink);
+  color: #ffffff;
+  border-color: var(--ink);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.result-card {
+  background: var(--ink);
+  color: #ffffff;
+  border-radius: 20px;
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 14.5px;
+}
+
+.result-row:last-child {
+  border-bottom: none;
+  padding-top: 18px;
+  margin-top: 6px;
+}
+
+.result-total {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--lime);
+  letter-spacing: -0.02em;
+}
+
+/* ---------- Feature Grid Variations ---------- */
+.feature-deep-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.step-number {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--lime);
+  color: var(--ink);
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+

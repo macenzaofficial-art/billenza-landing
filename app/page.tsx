@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import CheckoutModal from "../components/CheckoutModal";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import {
   FileText,
   ShieldCheck,
@@ -57,7 +59,7 @@ export default function BillenzaLanding() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const openCheckout = (plan: 'pro_monthly' | 'pro_yearly') => {
+  const openCheckout = (plan: 'pro_monthly' | 'pro_yearly' = 'pro_monthly') => {
     setCheckoutPlan(plan);
     setCheckoutOpen(true);
   };
@@ -373,161 +375,8 @@ export default function BillenzaLanding() {
 
   return (
     <div ref={mainRef} className="min-h-screen bg-white text-[#1d1d1d] overflow-x-hidden">
-      {/* ===================== HEADER ===================== */}
-      <header
-        className="site-header"
-        id="top"
-        style={{
-          boxShadow: scrolled ? "0 10px 30px -10px rgba(0,0,0,0.08)" : "none",
-          transition: "box-shadow 0.3s ease, background 0.3s ease",
-          background: scrolled ? "rgba(255, 255, 255, 0.94)" : "rgba(255, 255, 255, 0.85)",
-        }}
-      >
-        <nav className="nav container">
-          <a
-            href="#top"
-            className="brand"
-            aria-label="Billenza home"
-          >
-            <span className="brand-word">Billenza</span>
-          </a>
-
-          <div className="nav-links">
-            <div className="nav-item has-menu">
-              <button className="nav-link" type="button">
-                Platform
-                <ChevronDown size={14} className="chev" />
-              </button>
-              <div className="mega">
-                <a href="#features">
-                  <span className="mega-t">GST Tax Invoicing</span>
-                  <span className="mega-s">Tax invoices, delivery challans & credit notes</span>
-                </a>
-                <a href="#features">
-                  <span className="mega-t">GSTR Returns & 2B</span>
-                  <span className="mega-s">One-click GSTR-1/3B filing JSONs</span>
-                </a>
-                <a href="#features">
-                  <span className="mega-t">Inventory Radar</span>
-                  <span className="mega-s">Real-time stock deduction & alert triggers</span>
-                </a>
-                <a href="#features">
-                  <span className="mega-t">Multi-Currency Suite</span>
-                  <span className="mega-s">Export invoicing across 22 global currencies</span>
-                </a>
-              </div>
-            </div>
-            <a className="nav-link" href="#features">
-              Features
-            </a>
-            <a className="nav-link" href="#how-it-works">
-              How It Works
-            </a>
-            <a className="nav-link" href="#pricing">
-              Pricing
-            </a>
-            <a className="nav-link" href="#faq">
-              FAQ
-            </a>
-          </div>
-
-          <div className="nav-right" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <motion.a
-              href={`${appUrl}?mode=login`}
-              className="nav-link"
-              whileHover={{ y: -1 }}
-              whileTap={{ scale: 0.97 }}
-              style={{ fontWeight: 600, fontSize: "0.9rem", color: "var(--ink)", padding: "6px 12px" }}
-            >
-              Sign In
-            </motion.a>
-            <Link
-              href="/#pricing"
-              onClick={scrollToPricing}
-              className="pill pill-ink nav-cta"
-            >
-              Get Started
-              <span className="pill-arrow" aria-hidden="true">
-                <ArrowRight size={18} />
-              </span>
-            </Link>
-            <button
-              className={`hamburger ${mobileMenuOpen ? "open" : ""}`}
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle navigation"
-            >
-              <motion.span
-                animate={{
-                  rotate: mobileMenuOpen ? 45 : 0,
-                  y: mobileMenuOpen ? 7 : 0,
-                }}
-                transition={{ duration: 0.25 }}
-              />
-              <motion.span
-                animate={{
-                  opacity: mobileMenuOpen ? 0 : 1,
-                  x: mobileMenuOpen ? 12 : 0,
-                }}
-                transition={{ duration: 0.2 }}
-              />
-              <motion.span
-                animate={{
-                  rotate: mobileMenuOpen ? -45 : 0,
-                  y: mobileMenuOpen ? -7 : 0,
-                }}
-                transition={{ duration: 0.25 }}
-              />
-            </button>
-          </div>
-        </nav>
-
-        {/* Mobile menu sheet with Motion AnimatePresence */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="mobile-sheet"
-            >
-              <a href="#features" onClick={() => setMobileMenuOpen(false)}>
-                Platform Features
-              </a>
-              <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>
-                How It Works
-              </a>
-              <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>
-                Pricing &amp; Plans
-              </a>
-              <a href="#faq" onClick={() => setMobileMenuOpen(false)}>
-                FAQ
-              </a>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 14 }}>
-                <a
-                  href={`${appUrl}?mode=login`}
-                  className="pill"
-                  style={{ justifyContent: "center", border: "1px solid var(--line)", background: "#fff", color: "var(--ink)" }}
-                >
-                  Sign In
-                </a>
-                <Link
-                  href="/#pricing"
-                  onClick={(e) => {
-                    setMobileMenuOpen(false);
-                    scrollToPricing(e);
-                  }}
-                  className="pill pill-ink"
-                  style={{ justifyContent: "center" }}
-                >
-                  Get Started Free
-                  <ArrowRight size={16} />
-                </Link>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
+      {/* ===================== SHARED NAVBAR ===================== */}
+      <Navbar onOpenCheckout={openCheckout} />
 
       {/* ===================== HERO ===================== */}
       <section className="hero">
@@ -725,61 +574,109 @@ export default function BillenzaLanding() {
                 icon: FileText,
                 title: "Tax Invoicing & e-Way Bills",
                 desc: "Issue Tax Invoices, Bills of Supply, Proformas, and Delivery Challans with automatic CGST, SGST, IGST, UTGST, and cess calculations.",
+                href: "/features/gst-invoicing",
               },
               {
                 icon: Layers,
                 title: "Automated GSTR Returns",
                 desc: "Generate official GSTR-1 and GSTR-3B filing JSONs with one click. Reconcile your inward supply purchases against GSTR-2B effortlessly.",
+                href: "/features/gstr-reports",
               },
               {
                 icon: Globe2,
                 title: "22 Global Currencies",
                 desc: "Bill foreign clients in USD, EUR, GBP, AED, SGD, and 17 other currencies with automatic INR conversion notes and statutory LUT compliance.",
+                href: "/features/multi-currency",
               },
               {
                 icon: Package,
                 title: "Inventory & Low-Stock Radar",
                 desc: "Track product stock in real time. Set minimum threshold alerts and deduct inventory automatically when an invoice is finalized.",
+                href: "/features/inventory",
               },
               {
                 icon: Clock,
                 title: "Party Outstanding & Ledger",
                 desc: "Comprehensive aging analysis for every debtor. Send polite payment reminders with dynamic UPI QR codes directly via WhatsApp or email.",
+                href: "/features",
               },
               {
                 icon: ShieldCheck,
                 title: "TDS & TCS Audit Reports",
                 desc: "Full compliance with Section 194Q and 206C. Export Form 26Q and Form 27EQ statements ready for quarterly income tax submissions.",
+                href: "/features",
               },
             ].map((feature, idx) => {
               const Icon = feature.icon;
               return (
-                <motion.div
+                <Link
                   key={idx}
-                  className="feat"
-                  variants={{
-                    hidden: { opacity: 0, y: 30 },
-                    visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
-                  }}
-                  whileHover={{
-                    y: -6,
-                    boxShadow: "0 20px 42px -16px rgba(0, 0, 0, 0.14)",
-                    transition: { duration: 0.15, ease: "easeOut" },
-                  }}
+                  href={feature.href}
+                  style={{ textDecoration: "none", color: "inherit", display: "block" }}
                 >
                   <motion.div
-                    className="feat-ic"
-                    whileHover={{ scale: 1.15, rotate: 6 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                    className="feat"
+                    style={{ height: "100%", display: "flex", flexDirection: "column" }}
+                    variants={{
+                      hidden: { opacity: 0, y: 30 },
+                      visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+                    }}
+                    whileHover={{
+                      y: -6,
+                      boxShadow: "0 20px 42px -16px rgba(0, 0, 0, 0.14)",
+                      transition: { duration: 0.15, ease: "easeOut" },
+                    }}
                   >
-                    <Icon size={24} />
+                    <motion.div
+                      className="feat-ic"
+                      whileHover={{ scale: 1.15, rotate: 6 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                    >
+                      <Icon size={24} />
+                    </motion.div>
+                    <h3>{feature.title}</h3>
+                    <p style={{ flexGrow: 1 }}>{feature.desc}</p>
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700, color: "var(--ink)", marginTop: 14 }}>
+                      Explore Engine &rarr;
+                    </div>
                   </motion.div>
-                  <h3>{feature.title}</h3>
-                  <p>{feature.desc}</p>
-                </motion.div>
+                </Link>
               );
             })}
           </motion.div>
+
+          {/* Quick Hub Navigation Cards */}
+          <div style={{ marginTop: 40, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20 }}>
+            <Link href="/tools/gst-calculator" className="card-premium" style={{ textDecoration: "none", padding: 22, display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--lime)", color: "var(--ink)", display: "grid", placeItems: "center", flexShrink: 0, fontWeight: 800, fontSize: 18 }}>
+                %
+              </div>
+              <div>
+                <h4 style={{ fontSize: 15.5, fontWeight: 700, margin: 0, color: "var(--ink)" }}>Free Online GST Calculator</h4>
+                <p style={{ fontSize: 12.5, color: "var(--gray)", margin: "2px 0 0" }}>Interactive 5%, 12%, 18%, 28% &amp; reverse tax</p>
+              </div>
+            </Link>
+
+            <Link href="/compare" className="card-premium" style={{ textDecoration: "none", padding: 22, display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--ink)", color: "var(--lime)", display: "grid", placeItems: "center", flexShrink: 0, fontWeight: 800, fontSize: 14 }}>
+                VS
+              </div>
+              <div>
+                <h4 style={{ fontSize: 15.5, fontWeight: 700, margin: 0, color: "var(--ink)" }}>Billenza vs Tally &amp; Vyapar</h4>
+                <p style={{ fontSize: 12.5, color: "var(--gray)", margin: "2px 0 0" }}>Side-by-side feature comparison table</p>
+              </div>
+            </Link>
+
+            <Link href="/pricing" className="card-premium" style={{ textDecoration: "none", padding: 22, display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--lime)", color: "var(--ink)", display: "grid", placeItems: "center", flexShrink: 0, fontWeight: 800, fontSize: 18 }}>
+                ₹
+              </div>
+              <div>
+                <h4 style={{ fontSize: 15.5, fontWeight: 700, margin: 0, color: "var(--ink)" }}>Interactive ROI Calculator</h4>
+                <p style={{ fontSize: 12.5, color: "var(--gray)", margin: "2px 0 0" }}>Calculate your annual bookkeeping savings</p>
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -1356,59 +1253,7 @@ export default function BillenzaLanding() {
       </section>
 
       {/* ===================== FOOTER ===================== */}
-      <footer className="footer">
-        <div className="container">
-          <div className="foot-grid">
-            <div className="foot-brand">
-              <div className="brand">
-                <span className="brand-chip" aria-hidden="true">
-                  <Zap size={20} fill="#DCF986" stroke="#1D1D1D" />
-                </span>
-                <span className="brand-word light" style={{ color: "#fff" }}>Billenza</span>
-              </div>
-              <p>
-                Precision GST Invoicing, GSTR-1/3B Returns, Inventory Radar, and
-                Multi-Currency Financial Suite.
-              </p>
-              <div className="status-line">
-                <span className="ndot live"></span>
-                ALL SYSTEMS OPERATIONAL
-              </div>
-            </div>
-
-            <div className="foot-col">
-              <h4>Platform</h4>
-              <a href="#features">Tax Invoicing</a>
-              <a href="#features">e-Way Bill Generator</a>
-              <a href="#features">GSTR-1 &amp; 3B Filing</a>
-              <a href="#features">Inventory Radar</a>
-              <a href="#features">Multi-Currency Suite</a>
-            </div>
-
-            <div className="foot-col">
-              <h4>Company</h4>
-              <Link href="/about">About Us</Link>
-              <a href="#pricing">Pricing Plans</a>
-              <a href="#faq">Compliance &amp; Security</a>
-              <Link href="/contact">Contact &amp; Support</Link>
-            </div>
-
-            <div className="foot-col">
-              <h4>Legal</h4>
-              <Link href="/privacy">Privacy Policy</Link>
-              <Link href="/terms">Terms of Service</Link>
-              <Link href="/refund-policy">Cancellation &amp; Refunds</Link>
-              <Link href="/shipping-policy">Shipping &amp; Delivery</Link>
-              <Link href="/contact">Grievance Redressal</Link>
-            </div>
-          </div>
-
-          <div className="foot-base">
-            <div>&copy; 2026 Macenza / Billenza. All rights reserved.</div>
-            <div>Operated by Macenza (Proprietor: Shashank Shubham) &bull; Ajmer, Rajasthan, India.</div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Embedded Razorpay & Supabase Checkout Modal */}
       <CheckoutModal
