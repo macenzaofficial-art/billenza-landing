@@ -868,16 +868,16 @@ export default function BillenzaLanding() {
               <h4>Company</h4>
               <a href="#top">About Billenza</a>
               <a href="#pricing">Pricing Plans</a>
-              <a href="#faq">Compliance & Security</a>
-              <a href="mailto:support@billenza.com">Support & CA Desk</a>
+              <a href="#faq">Compliance &amp; Security</a>
+              <a href="/contact">Support &amp; CA Desk</a>
             </div>
 
             <div className="foot-col">
               <h4>Legal</h4>
-              <a href="#">Privacy Policy</a>
-              <a href="#">Terms of Service</a>
-              <a href="#">GST Compliance Guarantee</a>
-              <a href="#">RBI Payment Safety</a>
+              <a href="/privacy">Privacy Policy</a>
+              <a href="/terms">Terms of Service</a>
+              <a href="/refund-policy">Refund Policy</a>
+              <a href="/contact">Contact &amp; Grievances</a>
             </div>
           </div>
 
