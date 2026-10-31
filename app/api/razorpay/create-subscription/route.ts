@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const phone = body.phone || '';
     const name = body.name || '';
 
-    // Authenticate user via token or verified Supabase user record
+    // Authenticate user strictly via verified Supabase auth token
     let verifiedUserId: string | null = null;
     let verifiedEmail = inputEmail;
 
@@ -41,18 +41,6 @@ export async function POST(request: Request) {
     if (authUser) {
       verifiedUserId = authUser.id;
       if (authUser.email) verifiedEmail = authUser.email.toLowerCase();
-    } else if (body.userId) {
-      // Validate user existence against Supabase Auth admin
-      try {
-        const admin = getSupabaseAdmin();
-        const { data, error } = await admin.auth.admin.getUserById(body.userId);
-        if (!error && data?.user) {
-          verifiedUserId = data.user.id;
-          if (data.user.email) verifiedEmail = data.user.email.toLowerCase();
-        }
-      } catch (adminErr) {
-        console.warn('Could not verify userId via Supabase admin:', adminErr);
-      }
     }
 
     if (!verifiedUserId) {

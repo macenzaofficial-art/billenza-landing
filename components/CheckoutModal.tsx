@@ -136,6 +136,10 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
         throw new Error('Authentication succeeded but user profile was not returned. Please try again.');
       }
 
+      if (!userToken) {
+        throw new Error('Please sign in or check your email to verify your account before subscribing.');
+      }
+
       // 2. Strict Duplicate Subscription Check in Supabase DB
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
