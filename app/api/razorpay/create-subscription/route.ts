@@ -85,14 +85,10 @@ export async function POST(request: Request) {
     const amountInPaise = isYearly ? 499900 : 49900;
     const planName = isYearly ? 'Billenza Pro Yearly' : 'Billenza Pro Monthly';
 
-    // 1. Resolve configured Razorpay Subscription Plan ID
+    // 1. Resolve configured Razorpay Subscription Plan ID from server environment
     let resolvedPlanId = isYearly 
       ? process.env.RAZORPAY_PLAN_ANNUAL_4999 
       : process.env.RAZORPAY_PLAN_MONTHLY_499;
-
-    if (!resolvedPlanId && body.planId && body.planId.startsWith('plan_')) {
-      resolvedPlanId = body.planId;
-    }
 
     // Auto-create plan on the fly if user hasn't created one manually
     if (!resolvedPlanId) {

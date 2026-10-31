@@ -4,32 +4,43 @@ import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
 async function findUserByEmail(admin: ReturnType<typeof getSupabaseAdmin>, email: string): Promise<string | null> {
   const normalizedEmail = email.trim().toLowerCase();
-  let page = 1;
-  const perPage = 100;
+  if (!normalizedEmail) return null;
 
   try {
-    while (true) {
-      const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
-      if (error) {
-        throw error;
-      }
-      if (!data?.users || data.users.length === 0) {
-        break;
-      }
+    // 1. Direct O(1) indexed lookup from public.profiles table
+    const { data: profile, error: profileErr } = await admin
+      .from('profiles')
+      .select('user_id')
+      .ilike('email', normalizedEmail)
+      .limit(1)
+      .maybeSingle();
 
+    if (!profileErr && profile?.user_id) {
+      return profile.user_id;
+    }
+
+    // 2. Try database RPC if configured in Supabase
+    try {
+      const { data: rpcUserId, error: rpcErr } = await admin.rpc('get_user_id_by_email', {
+        user_email: normalizedEmail,
+      });
+      if (!rpcErr && rpcUserId) {
+        return rpcUserId as string;
+      }
+    } catch {
+      // RPC may not exist, continue to bounded fallback
+    }
+
+    // 3. Bounded fast lookup via Supabase Auth Admin API (max 1 page, no infinite sequential pagination loop)
+    const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 50 });
+    if (!error && data?.users) {
       const match = data.users.find(u => u.email?.trim().toLowerCase() === normalizedEmail);
       if (match) {
         return match.id;
       }
-
-      if (!data.nextPage || data.nextPage <= page) {
-        break;
-      }
-      page = data.nextPage;
     }
   } catch (err) {
     console.error('Error looking up user by email in webhook:', err);
-    throw err;
   }
 
   return null;
@@ -53,7 +64,7 @@ interface SaveSubscriptionParams {
 async function saveActiveSubscription(
   admin: ReturnType<typeof getSupabaseAdmin>,
   params: SaveSubscriptionParams
-): Promise<{ error?: any; ignored?: string }> {
+): Promise<{ error?: unknown; ignored?: string }> {
   const { userId, subscriptionId, customerId, planTier, currentPeriodEnd, eventTime, existingOrg, isRecurring } = params;
 
   if (existingOrg) {
@@ -208,9 +219,28 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Database check failed.' }, { status: 500 });
       }
 
-      const planTier = (sub.plan_id?.includes('year') || sub.notes?.plan_tier === 'pro_yearly')
-        ? 'pro_yearly'
-        : 'pro_monthly';
+      // Validate subscription plan against configured IDs or recognized tier markers
+      const monthlyPlanId = process.env.RAZORPAY_PLAN_MONTHLY_499;
+      const annualPlanId = process.env.RAZORPAY_PLAN_ANNUAL_4999;
+
+      const isYearly =
+        (annualPlanId && sub.plan_id === annualPlanId) ||
+        sub.plan_id?.toLowerCase().includes('year') ||
+        sub.notes?.plan_tier === 'pro_yearly';
+      const isMonthly =
+        (monthlyPlanId && sub.plan_id === monthlyPlanId) ||
+        sub.plan_id?.toLowerCase().includes('month') ||
+        sub.notes?.plan_tier === 'pro_monthly';
+
+      if (!isYearly && !isMonthly) {
+        console.error('Webhook rejected: unrecognized subscription plan_id:', sub.plan_id);
+        return NextResponse.json(
+          { error: 'Unrecognized subscription plan.' },
+          { status: 400 }
+        );
+      }
+
+      const planTier: 'pro_monthly' | 'pro_yearly' = isYearly ? 'pro_yearly' : 'pro_monthly';
 
       const result = await saveActiveSubscription(admin, {
         userId,
@@ -274,7 +304,41 @@ export async function POST(request: Request) {
         );
       }
 
-      const planTier = notes.plan_tier === 'pro_yearly' ? 'pro_yearly' : 'pro_monthly';
+      // Validate currency
+      if (payment?.currency && payment.currency !== 'INR') {
+        console.error('Webhook rejected: unsupported payment currency:', payment.currency);
+        return NextResponse.json(
+          { error: 'Payment currency must be INR.' },
+          { status: 400 }
+        );
+      }
+
+      // Validate payment amount against legitimate plan tiers
+      const VALID_PLANS: Record<number, 'pro_monthly' | 'pro_yearly'> = {
+        49900: 'pro_monthly',
+        499900: 'pro_yearly',
+      };
+
+      const paidAmount = Number(payment?.amount || order?.amount);
+      const derivedTier = VALID_PLANS[paidAmount];
+
+      if (!derivedTier) {
+        console.error(`Webhook rejected: invalid payment amount (${paidAmount})`);
+        return NextResponse.json(
+          { error: `Payment amount (${paidAmount}) does not match any valid plan tier.` },
+          { status: 400 }
+        );
+      }
+
+      if (notes.plan_tier && notes.plan_tier !== derivedTier) {
+        console.error(`Webhook rejected: notes plan_tier (${notes.plan_tier}) does not match amount tier (${derivedTier})`);
+        return NextResponse.json(
+          { error: 'Payment amount does not match plan tier in notes.' },
+          { status: 400 }
+        );
+      }
+
+      const planTier = derivedTier;
       const referenceId = order?.id || payment?.order_id || payment?.id;
 
       if (!referenceId) {

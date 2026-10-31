@@ -5,7 +5,7 @@ import crypto from 'crypto';
 if (fs.existsSync('.env.local') && typeof process.loadEnvFile === 'function') {
   try {
     process.loadEnvFile('.env.local');
-  } catch (err) {
+  } catch {
     // ignore
   }
 }
@@ -184,6 +184,96 @@ if (WEBHOOK_SECRET) {
     });
 
     assert(res.status === 422, `Expected status 422, got ${res.status}`);
+  });
+
+  // 9. Test webhook rejects payment with invalid / tampered amount (e.g. 100 paise)
+  await runTest('webhook rejects order/payment with invalid amount', async () => {
+    const payload = JSON.stringify({
+      event: 'payment.captured',
+      payload: {
+        payment: {
+          entity: {
+            id: 'pay_test_tampered',
+            amount: 100, // ₹1 instead of ₹499 or ₹4,999
+            currency: 'INR',
+            notes: { user_id: '00000000-0000-0000-0000-000000000000' },
+          },
+        },
+      },
+    });
+
+    const signature = crypto.createHmac('sha256', WEBHOOK_SECRET).update(payload).digest('hex');
+
+    const res = await testFetch('/api/webhooks/razorpay', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-razorpay-signature': signature,
+      },
+      body: payload,
+    });
+
+    assert(res.status === 400, `Expected status 400 for tampered amount, got ${res.status}`);
+  });
+
+  // 10. Test webhook rejects non-INR currency
+  await runTest('webhook rejects order/payment with unsupported currency', async () => {
+    const payload = JSON.stringify({
+      event: 'payment.captured',
+      payload: {
+        payment: {
+          entity: {
+            id: 'pay_test_curr',
+            amount: 49900,
+            currency: 'USD',
+            notes: { user_id: '00000000-0000-0000-0000-000000000000' },
+          },
+        },
+      },
+    });
+
+    const signature = crypto.createHmac('sha256', WEBHOOK_SECRET).update(payload).digest('hex');
+
+    const res = await testFetch('/api/webhooks/razorpay', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-razorpay-signature': signature,
+      },
+      body: payload,
+    });
+
+    assert(res.status === 400, `Expected status 400 for non-INR currency, got ${res.status}`);
+  });
+
+  // 11. Test webhook rejects unrecognized subscription plan ID
+  await runTest('webhook rejects subscription with unrecognized plan ID', async () => {
+    const payload = JSON.stringify({
+      event: 'subscription.charged',
+      payload: {
+        subscription: {
+          entity: {
+            id: 'sub_test_invalid_plan',
+            plan_id: 'plan_bogus_free_123',
+            customer_id: 'cust_test',
+            notes: { user_id: '00000000-0000-0000-0000-000000000000' },
+          },
+        },
+      },
+    });
+
+    const signature = crypto.createHmac('sha256', WEBHOOK_SECRET).update(payload).digest('hex');
+
+    const res = await testFetch('/api/webhooks/razorpay', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-razorpay-signature': signature,
+      },
+      body: payload,
+    });
+
+    assert(res.status === 400, `Expected status 400 for unrecognized plan, got ${res.status}`);
   });
 }
 

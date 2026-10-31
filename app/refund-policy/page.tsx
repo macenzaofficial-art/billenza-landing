@@ -31,35 +31,43 @@ export default function RefundPolicyPage() {
           <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>1. Subscription Cancellation</h2>
             <p>
-              You can cancel your Billenza subscription at any time directly through your Organization Settings dashboard or by emailing <a href="mailto:support@billenza.com" style={{ color: '#1d1d1d', fontWeight: 600 }}>support@billenza.com</a>. Upon cancellation, your account will remain active and fully functional until the end of the current paid billing cycle. You will not be charged for subsequent billing periods.
+              You can request cancellation of your Billenza subscription at any time by sending an email directly to our support desk at <a href="mailto:support@billenza.com" style={{ color: '#1d1d1d', fontWeight: 600 }}>support@billenza.com</a>. Cancellations are processed manually by our support team. Upon cancellation, your account will remain active and fully accessible until the conclusion of your current paid billing period, and no further subscription charges will occur.
             </p>
           </section>
 
           <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>2. 7-Day Money-Back Guarantee</h2>
             <p>
-              We want you to be completely satisfied with Billenza. If you subscribe to Billenza Pro (Monthly or Annual) and find that the software does not meet your business invoicing requirements, you are eligible for a <strong>100% full refund within 7 days</strong> of your initial purchase date.
+              We want you to be completely confident in choosing Billenza. If you subscribe to Billenza Pro (Monthly or Annual) and find that the software does not meet your business invoicing needs, you are eligible for a <strong>100% full refund within 7 days</strong> of your initial purchase date.
             </p>
           </section>
 
           <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>3. How to Request a Refund</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>3. How to Request a Refund (Email Only)</h2>
             <p>
-              To claim a refund under our 7-day guarantee, simply send an email to <a href="mailto:support@billenza.com" style={{ color: '#1d1d1d', fontWeight: 600 }}>support@billenza.com</a> from your registered account email with your payment reference or invoice ID.
+              All refund requests must be submitted directly via contact email. To initiate a refund, please write to <a href="mailto:support@billenza.com" style={{ color: '#1d1d1d', fontWeight: 600 }}>support@billenza.com</a> from your registered account email address with the following details:
+            </p>
+            <ul style={{ paddingLeft: '1.5rem', marginTop: '0.5rem' }}>
+              <li>Your registered account email address</li>
+              <li>Payment transaction reference ID or receipt number</li>
+              <li>Brief reason for the refund request</li>
+            </ul>
+            <p style={{ marginTop: '0.5rem' }}>
+              Please note that refunds are not issued automatically or through self-service payment gateway portals; they are reviewed and processed directly by our customer support team upon receiving your email.
             </p>
           </section>
 
           <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>4. Refund Processing Time</h2>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>4. Refund Review &amp; Processing Time</h2>
             <p>
-              Once approved, your refund will be initiated immediately via our payment gateway (Razorpay). Depending on your bank or card issuer, the credited amount will appear in your original payment method (Bank Account, UPI, or Credit/Debit Card) within <strong>5 to 7 business days</strong>.
+              Our billing desk reviews email refund requests within <strong>24 to 48 business hours</strong>. Once approved, the refund will be credited back to your original source payment method (Bank Account, UPI ID, or Debit/Credit Card) within <strong>5 to 7 business days</strong>, subject to your bank&apos;s settlement timelines.
             </p>
           </section>
 
           <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>5. Duplicate Payments</h2>
             <p>
-              In the unlikely event that technical network latency causes a duplicate charge, our automated reconciliation system will detect it and refund the surplus payment automatically within 48 hours.
+              If technical network latency causes a duplicate deduction for the same billing cycle, please email <a href="mailto:support@billenza.com" style={{ color: '#1d1d1d', fontWeight: 600 }}>support@billenza.com</a> with both transaction reference numbers. Our support team will verify the duplicate charge and process an immediate refund of the excess payment.
             </p>
           </section>
         </div>
