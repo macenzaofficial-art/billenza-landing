@@ -26,7 +26,7 @@ export default function ContactUsPage() {
             <Building size={14} />
             GET IN TOUCH
           </div>
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '0 0 1rem', letterSpacing: '-0.5px' }}>Contact Billenza</h1>
+          <h1 style={{ fontSize: '2.2rem', fontWeight: 700, margin: '0 0 1rem' }}>Contact Billenza</h1>
           <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.6, margin: '0 0 2rem' }}>
             Have a question about GST calculation rules, subscription billing, or cloud compliance? Our support team is here to assist you.
           </p>

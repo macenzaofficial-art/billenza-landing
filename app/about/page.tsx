@@ -26,7 +26,7 @@ export default function AboutUsPage() {
             <Sparkles size={14} />
             ABOUT BILLENZA
           </div>
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '0 0 0.5rem', letterSpacing: '-0.5px' }}>About Billenza</h1>
+          <h1 style={{ fontSize: '2.2rem', fontWeight: 700, margin: '0 0 0.5rem' }}>About Billenza</h1>
           <p style={{ color: '#64748b', fontSize: '0.95rem', margin: '0 0 2rem' }}>
             Precision-engineered GST billing, inventory management, and tax compliance suite for modern Indian enterprises.
           </p>

@@ -565,11 +565,12 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
                           cursor: 'pointer',
                         }}
                       >
-                        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', height: 'var(--r)' }}>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.5px' }}>
                           MONTHLY PRO
                         </div>
-                        <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#1d1d1d' }}>
-                          ₹499<span style={{ fontSize: '0.75rem', fontWeight: 400 }}> /mo</span>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, marginTop: 4 }}>
+                          <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', lineHeight: 1 }}>₹499</span>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 500, color: '#64748b' }}>/mo</span>
                         </div>
                       </motion.button>
 
@@ -603,11 +604,12 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
                         >
                           SAVE 17%
                         </span>
-                        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', height: 'var(--r)' }}>
+                        <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#64748b', letterSpacing: '0.5px' }}>
                           ANNUAL PRO
                         </div>
-                        <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#1d1d1d' }}>
-                          ₹4,999<span style={{ fontSize: '0.75rem', fontWeight: 400 }}> /yr</span>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, marginTop: 4 }}>
+                          <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', lineHeight: 1 }}>₹4,999</span>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 500, color: '#64748b' }}>/yr</span>
                         </div>
                       </motion.button>
                     </div>
@@ -656,7 +658,7 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
                           Email Address <span style={{ color: '#ef4444' }}>*</span>
                         </label>
                         <div style={{ position: 'relative' }}>
-                          <Mail size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#94a3b8' }} />
+                          <Mail size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
                           <input
                             type="email"
                             required
@@ -665,10 +667,10 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
                             onChange={(e) => setEmail(e.target.value)}
                             style={{
                               width: '100%',
-                              padding: '0.65rem 0.75rem 0.65rem 2.25rem',
+                              padding: '0.72rem 0.85rem 0.72rem 2.75rem',
                               borderRadius: 10,
                               border: '1px solid #cbd5e1',
-                              fontSize: '0.85rem',
+                              fontSize: '0.875rem',
                               outline: 'none',
                               boxSizing: 'border-box',
                             }}
@@ -690,7 +692,7 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
                           Password <span style={{ color: '#ef4444' }}>*</span>
                         </label>
                         <div style={{ position: 'relative' }}>
-                          <Lock size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#94a3b8' }} />
+                          <Lock size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
                           <input
                             type="password"
                             required
@@ -700,10 +702,10 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
                             onChange={(e) => setPassword(e.target.value)}
                             style={{
                               width: '100%',
-                              padding: '0.65rem 0.75rem 0.65rem 2.25rem',
+                              padding: '0.72rem 0.85rem 0.72rem 2.75rem',
                               borderRadius: 10,
                               border: '1px solid #cbd5e1',
-                              fontSize: '0.85rem',
+                              fontSize: '0.875rem',
                               outline: 'none',
                               boxSizing: 'border-box',
                             }}
@@ -726,7 +728,7 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
                             Business / Company Name (Optional)
                           </label>
                           <div style={{ position: 'relative' }}>
-                            <Building2 size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#94a3b8' }} />
+                            <Building2 size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
                             <input
                               type="text"
                               placeholder="Macenza Technologies"
@@ -734,10 +736,10 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
                               onChange={(e) => setBusinessName(e.target.value)}
                               style={{
                                 width: '100%',
-                                padding: '0.65rem 0.75rem 0.65rem 2.25rem',
+                                padding: '0.72rem 0.85rem 0.72rem 2.75rem',
                                 borderRadius: 10,
                                 border: '1px solid #cbd5e1',
-                                fontSize: '0.85rem',
+                                fontSize: '0.875rem',
                                 outline: 'none',
                                 boxSizing: 'border-box',
                               }}
@@ -818,7 +820,7 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
                         </>
                       ) : (
                         <>
-                          Pay {planPrice} with Razorpay to Unlock
+                          Pay {planPrice} with Razorpay
                           <ArrowRight size={16} />
                         </>
                       )}
@@ -836,7 +838,7 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
                       }}
                     >
                       <ShieldCheck size={14} color="#059669" />
-                      <span>256-bit encrypted • Razorpay Secured • Instant activation</span>
+                      <span>256-bit encrypted • Instant activation</span>
                     </div>
                   </form>
                 </motion.div>

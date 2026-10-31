@@ -26,7 +26,7 @@ export default function PrivacyPolicyPage() {
             <ShieldCheck size={14} />
             DATA PRIVACY &amp; DPDP ACT COMPLIANCE
           </div>
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '0 0 0.5rem', letterSpacing: '-0.5px' }}>Privacy Policy</h1>
+          <h1 style={{ fontSize: '2.2rem', fontWeight: 700, margin: '0 0 0.5rem' }}>Privacy Policy</h1>
           <p style={{ color: '#64748b', fontSize: '0.95rem', margin: '0 0 2rem' }}>
             Statutory data protection, data collection disclosures, and security architecture for Billenza, owned and operated by Macenza (Sole Proprietorship: Shashank Shubham).
           </p>

@@ -26,7 +26,7 @@ export default function TermsOfServicePage() {
             <FileText size={14} />
             TERMS &amp; CONDITIONS
           </div>
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '0 0 0.5rem', letterSpacing: '-0.5px' }}>Terms of Service</h1>
+          <h1 style={{ fontSize: '2.2rem', fontWeight: 700, margin: '0 0 0.5rem' }}>Terms of Service</h1>
           <p style={{ color: '#64748b', fontSize: '0.95rem', margin: '0 0 2rem' }}>
             Legal agreement governing the access and use of Billenza, operated by Macenza (Sole Proprietorship: Shashank Shubham).
           </p>

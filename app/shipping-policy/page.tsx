@@ -26,7 +26,7 @@ export default function ShippingPolicyPage() {
             <Truck size={14} />
             DIGITAL FULFILLMENT &amp; SERVICE DELIVERY
           </div>
-          <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '0 0 0.5rem', letterSpacing: '-0.5px' }}>Shipping &amp; Delivery Policy</h1>
+          <h1 style={{ fontSize: '2.2rem', fontWeight: 700, margin: '0 0 0.5rem' }}>Shipping &amp; Delivery Policy</h1>
           <p style={{ color: '#64748b', fontSize: '0.95rem', margin: '0 0 2rem' }}>
             Digital Service Delivery &amp; Subscription Fulfillment Terms for Billenza, a product of Macenza.
           </p>
