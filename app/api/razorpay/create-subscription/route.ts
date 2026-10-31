@@ -1,23 +1,66 @@
 import { NextResponse } from 'next/server';
+import { getAuthenticatedUser, getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+function getCorsHeaders(request: Request) {
+  const origin = request.headers.get('origin');
+  const allowedOrigins = [
+    process.env.NEXT_PUBLIC_APP_URL,
+    process.env.NEXT_PUBLIC_MARKETING_URL,
+    'http://localhost:3000',
+    'http://localhost:47371',
+  ].filter(Boolean) as string[];
 
-export async function OPTIONS() {
-  return NextResponse.json({}, { headers: corsHeaders });
+  const isAllowed = origin && allowedOrigins.some(allowed => allowed.replace(/\/$/, '') === origin.replace(/\/$/, ''));
+
+  return {
+    'Access-Control-Allow-Origin': isAllowed ? origin! : (allowedOrigins[0] || ''),
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+}
+
+export async function OPTIONS(request: Request) {
+  return NextResponse.json({}, { headers: getCorsHeaders(request) });
 }
 
 export async function POST(request: Request) {
+  const corsHeaders = getCorsHeaders(request);
+
   try {
     const body = await request.json();
     const planTier = body.planTier || (body.planId?.includes('year') ? 'pro_yearly' : 'pro_monthly');
-    const email = body.email || '';
+    const inputEmail = (body.email || '').trim().toLowerCase();
     const phone = body.phone || '';
     const name = body.name || '';
-    const userId = body.userId || '';
+
+    // Authenticate user via token or verified Supabase user record
+    let verifiedUserId: string | null = null;
+    let verifiedEmail = inputEmail;
+
+    const authUser = await getAuthenticatedUser(request);
+    if (authUser) {
+      verifiedUserId = authUser.id;
+      if (authUser.email) verifiedEmail = authUser.email.toLowerCase();
+    } else if (body.userId) {
+      // Validate user existence against Supabase Auth admin
+      try {
+        const admin = getSupabaseAdmin();
+        const { data, error } = await admin.auth.admin.getUserById(body.userId);
+        if (!error && data?.user) {
+          verifiedUserId = data.user.id;
+          if (data.user.email) verifiedEmail = data.user.email.toLowerCase();
+        }
+      } catch (adminErr) {
+        console.warn('Could not verify userId via Supabase admin:', adminErr);
+      }
+    }
+
+    if (!verifiedUserId) {
+      return NextResponse.json(
+        { error: 'Unauthorized. Please sign in or register to initiate subscription.' },
+        { status: 401, headers: corsHeaders }
+      );
+    }
 
     const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -25,36 +68,29 @@ export async function POST(request: Request) {
     if (!keyId || !keySecret) {
       return NextResponse.json(
         { 
-          error: 'Razorpay API credentials not configured. Please set NEXT_PUBLIC_RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in billenza-landing/billenza/.env.local.' 
+          error: 'Razorpay API credentials not configured. Please set NEXT_PUBLIC_RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in environment variables.' 
         },
         { status: 500, headers: corsHeaders }
       );
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
     // Server-Side Duplicate Check: Prevent multiple active subscriptions
-    if (supabaseUrl && serviceRoleKey && userId) {
-      try {
-        const orgRes = await fetch(`${supabaseUrl}/rest/v1/organizations?owner_id=eq.${userId}&select=subscription_status,plan_tier`, {
-          headers: {
-            apikey: serviceRoleKey,
-            Authorization: `Bearer ${serviceRoleKey}`,
-          },
-        });
-        if (orgRes.ok) {
-          const orgs = await orgRes.json();
-          if (orgs?.length > 0 && orgs[0].subscription_status === 'active') {
-            return NextResponse.json(
-              { error: 'An active subscription already exists for this account. No need to subscribe again!' },
-              { status: 400, headers: corsHeaders }
-            );
-          }
-        }
-      } catch (checkErr) {
-        console.warn('Could not verify existing subscription status:', checkErr);
+    try {
+      const admin = getSupabaseAdmin();
+      const { data: orgData, error: orgError } = await admin
+        .from('organizations')
+        .select('subscription_status, plan_tier')
+        .eq('owner_id', verifiedUserId)
+        .maybeSingle();
+
+      if (!orgError && orgData?.subscription_status === 'active') {
+        return NextResponse.json(
+          { error: 'An active subscription already exists for this account. No need to subscribe again!' },
+          { status: 400, headers: corsHeaders }
+        );
       }
+    } catch (checkErr) {
+      console.warn('Could not verify existing subscription status:', checkErr);
     }
 
     const authHeader = `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString('base64')}`;
@@ -115,8 +151,8 @@ export async function POST(request: Request) {
           quantity: 1,
           customer_notify: 1,
           notes: {
-            user_id: userId,
-            email,
+            user_id: verifiedUserId,
+            email: verifiedEmail,
             name,
             phone,
             plan_tier: planTier,
@@ -137,7 +173,7 @@ export async function POST(request: Request) {
     }
 
     // 3. Fallback: If recurring subscriptions fail or aren't enabled on test account,
-    // generate an instant Razorpay Order so the test checkout modal ALWAYS works!
+    // generate an instant Razorpay Order
     const orderRes = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
       headers: {
@@ -149,8 +185,8 @@ export async function POST(request: Request) {
         currency: 'INR',
         receipt: `rcpt_${Date.now()}`,
         notes: {
-          user_id: userId,
-          email,
+          user_id: verifiedUserId,
+          email: verifiedEmail,
           name,
           plan_tier: planTier,
         },
