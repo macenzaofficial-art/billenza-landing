@@ -1231,15 +1231,15 @@ export default function BillenzaLanding() {
                 </li>
               </ul>
 
-              <a
-                href="mailto:enterprise@billenza.com?subject=Enterprise%20Inquiry%20-%20Billenza"
+              <Link
+                href="/contact"
                 className="pill pill-ghost plan-cta"
               >
                 Contact Sales
                 <span className="pill-arrow gray">
                   <ArrowRight size={18} />
                 </span>
-              </a>
+              </Link>
             </motion.div>
           </motion.div>
         </div>
