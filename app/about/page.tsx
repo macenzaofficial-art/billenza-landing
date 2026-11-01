@@ -115,10 +115,29 @@ export default function AboutUsPage() {
             </div>
           </section>
 
-          <section style={{ marginBottom: '1rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
+          <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>4. Security &amp; Data Integrity Commitment</h2>
             <p>
               We prioritize tenant data isolation and financial confidentiality. All communications are encrypted via TLS 1.3 in transit and AES-256 at rest. Subscriptions are billed securely through Reserve Bank of India (RBI) authorized payment aggregators (Razorpay), ensuring no sensitive card or banking credentials touch our application servers.
+            </p>
+          </section>
+
+          <section id="credits" style={{ marginBottom: '1rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>5. Open Source Credits &amp; Attribution</h2>
+            <p>
+              Billenza is powered by and incorporates code from <strong>Free GST Billing Software</strong>, an open-source project authored and maintained by{' '}
+              <a
+                href="https://github.com/IamRamgarhia/Free-GST-Billing-Software"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#1d1d1d', fontWeight: 600, textDecoration: 'underline' }}
+              >
+                IamRamgarhia
+              </a>{' '}
+              along with <strong>DiceCodes</strong> and community contributors under the MIT License.
+            </p>
+            <p style={{ marginTop: '0.5rem' }}>
+              We gratefully acknowledge and give full credit to the repository authors for their foundational software engineering and contributions to the open-source community.
             </p>
           </section>
         </div>
