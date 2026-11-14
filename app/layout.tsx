@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Billenza — Precision GST Invoicing & Compliance Engine",
+  title: "Billenza — Precision GST Invoicing & Compliance Cloud Suite",
   description:
-    "India's dependable financial and GST billing SaaS. Generate tax invoices, e-Way bills, multi-currency invoices in 22 currencies, and one-click GSTR-1/3B filing returns.",
+    "Cloud-hosted Indian GST billing and invoicing SaaS operated by Macenza. Generate tax invoices, e-Way bills, multi-currency invoices in 22 currencies, and one-click GSTR-1/3B filing returns.",
   keywords: [
     "GST billing software",
     "GST invoice generator",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     "SME invoicing SaaS",
     "Billenza",
   ],
-  authors: [{ name: "Billenza Inc." }],
+  authors: [{ name: "Macenza (Billenza)" }],
 };
 
 export default function RootLayout({

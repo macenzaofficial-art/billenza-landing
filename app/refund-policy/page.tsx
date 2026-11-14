@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, RefreshCw, AlertCircle, CheckCircle2, Mail, Phone } from 'lucide-react';
 
 export const metadata = {
@@ -12,9 +13,9 @@ export default function RefundPolicyPage() {
     <div style={{ minHeight: '100vh', background: '#fafafa', color: '#1d1d1d', fontFamily: 'inherit' }}>
       <header style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #e2e8f0', background: '#fff' }}>
         <div style={{ maxWidth: 840, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none', color: '#1d1d1d', fontWeight: 600, fontSize: '0.9rem' }}>
+          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: '#1d1d1d', fontWeight: 600, fontSize: '0.9rem' }}>
             <ArrowLeft size={16} />
-            Back to Billenza
+            <Image src="/billenza-logo.webp" alt="Billenza" width={110} height={34} style={{ height: 26, width: 'auto', objectFit: 'contain' }} />
           </Link>
           <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Last updated: October 2026</span>
         </div>
@@ -28,7 +29,7 @@ export default function RefundPolicyPage() {
           </div>
           <h1 style={{ fontSize: '2.2rem', fontWeight: 700, margin: '0 0 0.5rem' }}>Cancellation &amp; Refund Policy</h1>
           <p style={{ color: '#64748b', fontSize: '0.95rem', margin: '0 0 2rem' }}>
-            Official billing policies and cancellation procedures for Billenza, operated by Macenza (Sole Proprietorship: Shashank Shubham).
+            Official billing policies and cancellation procedures for Billenza, operated by Macenza .
           </p>
 
           <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
@@ -102,7 +103,7 @@ export default function RefundPolicyPage() {
             <p>To request a refund for a duplicate deduction, email our support desk:</p>
             <div style={{ background: '#f8fafc', borderRadius: 12, padding: '1.25rem', border: '1px solid #e2e8f0', marginTop: '0.75rem', fontSize: '0.9rem', color: '#334155', lineHeight: 1.6 }}>
               <div><strong>Email:</strong> <a href="mailto:info@macenza.com" style={{ color: '#1d1d1d', fontWeight: 600 }}>info@macenza.com</a></div>
-              <div><strong>Phone Support:</strong> <a href="tel:+919414660123" style={{ color: '#1d1d1d', fontWeight: 600 }}>+91 94146 60123</a></div>
+              
               <div><strong>Required Details:</strong> Registered account email, both Razorpay transaction reference numbers (Payment IDs), and date of debit.</div>
               <div><strong>Response Turnaround:</strong> Within 24 to 48 business hours.</div>
             </div>

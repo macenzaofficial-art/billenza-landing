@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Truck, CheckCircle2, ShieldCheck, Mail, Phone, Clock } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowLeft, Truck, CheckCircle2, ShieldCheck, Mail, ExternalLink, Clock } from 'lucide-react';
 
 export const metadata = {
   title: 'Shipping & Delivery Policy — Billenza',
@@ -12,9 +13,9 @@ export default function ShippingPolicyPage() {
     <div style={{ minHeight: '100vh', background: '#fafafa', color: '#1d1d1d', fontFamily: 'inherit' }}>
       <header style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #e2e8f0', background: '#fff' }}>
         <div style={{ maxWidth: 840, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none', color: '#1d1d1d', fontWeight: 600, fontSize: '0.9rem' }}>
+          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: '#1d1d1d', fontWeight: 600, fontSize: '0.9rem' }}>
             <ArrowLeft size={16} />
-            Back to Billenza
+            <Image src="/billenza-logo.webp" alt="Billenza" width={110} height={34} style={{ height: 26, width: 'auto', objectFit: 'contain' }} />
           </Link>
           <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Last updated: October 2026</span>
         </div>
@@ -34,7 +35,7 @@ export default function ShippingPolicyPage() {
           <section style={{ marginBottom: '2rem', lineHeight: 1.7, fontSize: '0.95rem', color: '#334155' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1d1d1d', margin: '1.5rem 0 0.5rem' }}>1. 100% Digital Service Delivery (No Physical Shipping)</h2>
             <p>
-              Billenza is a cloud-hosted Software-as-a-Service (SaaS) financial compliance and GST invoicing platform operated by <strong>Macenza</strong> (Sole Proprietorship: <strong>Shashank Shubham</strong>).
+              Billenza is a cloud-hosted Software-as-a-Service (SaaS) financial compliance and GST invoicing platform operated by <strong>Macenza</strong> .
             </p>
             <p style={{ marginTop: '0.5rem' }}>
               We provide electronic software services exclusively. <strong>No physical products, hardware, paper invoices, or installation media are shipped, couriered, or dispatched to your physical postal address.</strong> All tools, reports, calculation engines, and databases are accessed entirely through our secure web portal.
@@ -99,10 +100,10 @@ export default function ShippingPolicyPage() {
               </div>
               <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#1d1d1d', marginBottom: 4 }}>
-                  <Phone size={16} /> Phone Support
+                  <ExternalLink size={16} /> Online Portal
                 </div>
-                <a href="tel:+919414660123" style={{ color: '#1d1d1d', textDecoration: 'none', fontSize: '0.9rem' }}>
-                  +91 94146 60123
+                <a href="https://app.billenza.com" target="_blank" rel="noopener noreferrer" style={{ color: '#1d1d1d', textDecoration: 'none', fontSize: '0.9rem' }}>
+                  app.billenza.com
                 </a>
               </div>
               <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
