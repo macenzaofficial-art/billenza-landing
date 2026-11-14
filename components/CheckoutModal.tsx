@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 import { X, ShieldCheck, ArrowRight, Loader2, AlertCircle, Sparkles, Building2, Mail, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -73,6 +74,7 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [businessName, setBusinessName] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +86,7 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
     setActiveSubFound(null);
     setPaymentSuccess(false);
     setLoading(false);
+    setAcceptedTerms(false);
     setPlan(initialPlan);
     onClose();
   };
@@ -113,6 +116,12 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!acceptedTerms) {
+      setError('Please accept the terms and privacy policy to proceed.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -841,6 +850,69 @@ export default function CheckoutModal({ isOpen, onClose, initialPlan = 'pro_mont
                           </button>
                         </span>
                       )}
+                    </div>
+
+                    {/* Terms and Privacy Policy acceptance */}
+                    <div style={{ marginBottom: '1.25rem' }}>
+                      <label
+                        htmlFor="accept-terms-privacy"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: 10,
+                          fontSize: '0.8rem',
+                          color: '#475569',
+                          cursor: 'pointer',
+                          lineHeight: 1.45,
+                          userSelect: 'none',
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          id="accept-terms-privacy"
+                          required
+                          checked={acceptedTerms}
+                          onChange={(e) => setAcceptedTerms(e.target.checked)}
+                          style={{
+                            marginTop: 2,
+                            width: 16,
+                            height: 16,
+                            accentColor: '#1d1d1d',
+                            cursor: 'pointer',
+                            flexShrink: 0,
+                          }}
+                        />
+                        <span>
+                          I accept{' '}
+                          <Link
+                            href="/terms"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              color: '#1d1d1d',
+                              fontWeight: 600,
+                              textDecoration: 'underline',
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            terms
+                          </Link>{' '}
+                          and{' '}
+                          <Link
+                            href="/privacy"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              color: '#1d1d1d',
+                              fontWeight: 600,
+                              textDecoration: 'underline',
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            privacy policy
+                          </Link>
+                        </span>
+                      </label>
                     </div>
 
                     {/* Submit CTA */}
