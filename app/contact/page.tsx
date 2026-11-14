@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Mail, MapPin, Clock, Building, ShieldCheck, ExternalLink } from 'lucide-react';
+import Footer from '@/components/Footer';
 
 export const metadata = {
   title: 'Contact Us & Support Desk — Billenza',
@@ -99,6 +100,7 @@ export default function ContactUsPage() {
           </section>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

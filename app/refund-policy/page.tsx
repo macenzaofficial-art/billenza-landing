@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, RefreshCw, AlertCircle, CheckCircle2, Mail, Phone } from 'lucide-react';
+import Footer from '@/components/Footer';
 
 export const metadata = {
   title: 'Cancellation & Refund Policy — Billenza',
@@ -110,6 +111,7 @@ export default function RefundPolicyPage() {
           </section>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

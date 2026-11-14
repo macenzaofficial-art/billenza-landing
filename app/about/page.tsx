@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Footer from '@/components/Footer';
 import {
   ArrowLeft,
   Sparkles,
@@ -933,91 +934,7 @@ export default function AboutUsPage() {
       </main>
 
       {/* Footer */}
-      <footer
-        style={{
-          borderTop: '1px solid #e2e8f0',
-          background: '#ffffff',
-          padding: '3.5rem 2rem 2.5rem',
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 1080,
-            margin: '0 auto',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '2.5rem',
-            marginBottom: '3rem',
-          }}
-        >
-          <div>
-            <Image
-              src="/billenza-logo.webp"
-              alt="Billenza"
-              width={120}
-              height={36}
-              style={{ height: 28, width: 'auto', objectFit: 'contain', marginBottom: '1rem' }}
-            />
-            <p style={{ fontSize: '0.85rem', color: '#64748b', lineHeight: 1.6, margin: 0 }}>
-              Precision GST billing, inventory, and compliance infrastructure for modern Indian commerce.
-            </p>
-          </div>
-
-          <div>
-            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#0f172a', margin: '0 0 1rem' }}>
-              Product
-            </h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10, fontSize: '0.85rem' }}>
-              <li><Link href="/features" style={{ color: '#475569', textDecoration: 'none' }}>Features</Link></li>
-              <li><Link href="/how-it-works" style={{ color: '#475569', textDecoration: 'none' }}>How It Works</Link></li>
-              <li><Link href="/pricing" style={{ color: '#475569', textDecoration: 'none' }}>Pricing Plans</Link></li>
-              <li><Link href="/#faq" style={{ color: '#475569', textDecoration: 'none' }}>FAQ</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#0f172a', margin: '0 0 1rem' }}>
-              Compliance &amp; Legal
-            </h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10, fontSize: '0.85rem' }}>
-              <li><Link href="/privacy" style={{ color: '#475569', textDecoration: 'none' }}>Privacy Policy</Link></li>
-              <li><Link href="/terms" style={{ color: '#475569', textDecoration: 'none' }}>Terms &amp; Conditions</Link></li>
-              <li><Link href="/refund-policy" style={{ color: '#475569', textDecoration: 'none' }}>Refund Policy</Link></li>
-              <li><Link href="#credits" style={{ color: '#475569', textDecoration: 'none' }}>Open Source Credits</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#0f172a', margin: '0 0 1rem' }}>
-              Company
-            </h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10, fontSize: '0.85rem' }}>
-              <li><Link href="/about" style={{ color: '#0f172a', fontWeight: 600, textDecoration: 'none' }}>About Us</Link></li>
-              <li><Link href="/contact" style={{ color: '#475569', textDecoration: 'none' }}>Contact &amp; Support</Link></li>
-              <li><a href="mailto:info@macenza.com" style={{ color: '#475569', textDecoration: 'none' }}>info@macenza.com</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div
-          style={{
-            maxWidth: 1080,
-            margin: '0 auto',
-            paddingTop: '2rem',
-            borderTop: '1px solid #f1f5f9',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '1rem',
-            fontSize: '0.82rem',
-            color: '#64748b',
-          }}
-        >
-          <div>&copy; {new Date().getFullYear()} Billenza. All rights reserved.</div>
-          <div>Operated commercially by Macenza.</div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

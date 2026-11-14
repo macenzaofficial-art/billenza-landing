@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Truck, CheckCircle2, ShieldCheck, Mail, ExternalLink, Clock } from 'lucide-react';
+import Footer from '@/components/Footer';
 
 export const metadata = {
   title: 'Shipping & Delivery Policy — Billenza',
@@ -118,6 +119,7 @@ export default function ShippingPolicyPage() {
           </section>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
